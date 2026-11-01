@@ -213,6 +213,11 @@ async function run(trigger: 'edit' | 'target' | typeof state.source) {
   }
   state.result = res.result;
   renderReport();
+  // After loading a project, open the file with the first (most severe) problem instead of whatever sorted first.
+  if (trigger === 'sample' || trigger === 'files' || trigger === 'zip') {
+    const first = groupFindings(res.result.findings)[0]?.files[0]?.findings[0];
+    if (first) show(first.file, first.line);
+  }
 
   const shouldTrack = trigger !== 'edit' || !state.pasteTracked;
   if (trigger === 'edit') state.pasteTracked = true;
