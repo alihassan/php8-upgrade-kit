@@ -3,10 +3,10 @@ require __DIR__ . '/../lib/bootstrap.php';
 require_login();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $name = filter_input(INPUT_POST, 'name', FILTER_SANITIZE_STRING);
+    $name = post_text('name');
     $email = filter_input(INPUT_POST, 'email', FILTER_VALIDATE_EMAIL);
-    $company = filter_input(INPUT_POST, 'company', FILTER_SANITIZE_STRING);
-    $city = filter_input(INPUT_POST, 'city', FILTER_SANITIZE_STRING);
+    $company = post_text('company');
+    $city = post_text('city');
     if ($name && $email) {
         $stmt = db()->prepare('INSERT INTO customers (name, email, company, city, created_at) VALUES (?, ?, ?, ?, NOW())');
         $stmt->execute([$name, $email, $company, $city]);
@@ -17,7 +17,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     redirect('customers.php');
 }
 
-$q = filter_input(INPUT_GET, 'q', FILTER_SANITIZE_STRING);
+// The search term is never stored, and h() escapes it on output.
+$q = filter_input(INPUT_GET, 'q');
 $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $perPage = 20;
 

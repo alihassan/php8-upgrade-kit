@@ -46,13 +46,25 @@ function initials($name)
 
 function format_date($datetime)
 {
-    return strftime('%d %b %Y', strtotime($datetime));
+    // Was strftime('%d %b %Y'). date() gives the same English output without the server locale.
+    return date('d M Y', strtotime($datetime));
 }
 
 function invoice_number($orderId)
 {
     $prefix = $GLOBALS['config']['invoice_prefix'];
-    return "${prefix}-" . str_pad($orderId, 6, '0', STR_PAD_LEFT);
+    return "{$prefix}-" . str_pad($orderId, 6, '0', STR_PAD_LEFT);
+}
+
+/**
+ * A posted text field with HTML tags removed, or null when it wasn't sent.
+ * Replaces FILTER_SANITIZE_STRING, which also turned quotes into &#39; and
+ * &#34; before they were saved, so "O'Brien" showed up as "O&#39;Brien".
+ */
+function post_text($field)
+{
+    $value = filter_input(INPUT_POST, $field);
+    return is_string($value) ? strip_tags($value) : null;
 }
 
 function status_label($status)

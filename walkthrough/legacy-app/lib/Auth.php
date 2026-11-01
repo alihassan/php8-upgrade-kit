@@ -2,12 +2,12 @@
 
 class Auth
 {
-    public function check()
+    public static function check()
     {
         return isset($_SESSION['user_id']);
     }
 
-    public function attempt($email, $password)
+    public static function attempt($email, $password)
     {
         $user = db_one('SELECT * FROM users WHERE email = ?', [$email]);
         if (!$user || !password_verify($password, $user['password_hash'])) {
@@ -19,12 +19,12 @@ class Auth
         return true;
     }
 
-    public function user()
+    public static function user()
     {
         return $_SESSION['user_name'] ?? null;
     }
 
-    public function logout()
+    public static function logout()
     {
         $_SESSION = [];
         session_destroy();
