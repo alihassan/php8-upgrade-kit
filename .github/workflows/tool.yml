@@ -1,0 +1,22 @@
+name: tool
+
+on:
+  push:
+    branches: [main]
+    paths: ['tool/**', '.github/workflows/tool.yml']
+  pull_request:
+    paths: ['tool/**', '.github/workflows/tool.yml']
+
+jobs:
+  test:
+    runs-on: ubuntu-24.04
+    defaults:
+      run: { working-directory: tool }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with: { node-version: 22, cache: npm, cache-dependency-path: tool/package-lock.json }
+      - run: npm ci
+      # Fails if any rule is missing its match.php / ok.php fixture.
+      - run: npm test
+      - run: npm run build
