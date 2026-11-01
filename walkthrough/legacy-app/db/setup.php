@@ -7,6 +7,7 @@
  *   DB_NAME=invoicer_test php db/setup.php --orders=60 --customers=25 --products=15
  */
 require __DIR__ . '/seed.php';
+require __DIR__ . '/migrations.php';
 
 $opts = getopt('', ['orders::', 'customers::', 'products::']);
 $c = require __DIR__ . '/../config/config.php';
@@ -16,15 +17,10 @@ $pdo->exec('DROP DATABASE IF EXISTS `' . $c['db_name'] . '`');
 $pdo->exec('CREATE DATABASE `' . $c['db_name'] . '` CHARACTER SET utf8mb4');
 $pdo->exec('USE `' . $c['db_name'] . '`');
 
-$sql = file_get_contents(__DIR__ . '/schema.sql');
-$migrations = glob(__DIR__ . '/migrations/*.sql');
-sort($migrations);
-foreach ($migrations as $m) {
-    $sql .= "\n" . file_get_contents($m);
-}
-foreach (array_filter(array_map(trim(...), explode(';', preg_replace('/^--.*$/m', '', $sql)))) as $statement) {
+foreach (sql_statements(file_get_contents(__DIR__ . '/schema.sql')) as $statement) {
     $pdo->exec($statement);
 }
+$migrations = run_migrations($pdo);
 
 $counts = seed_database(
     $pdo,

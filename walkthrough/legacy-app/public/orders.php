@@ -2,24 +2,30 @@
 require __DIR__ . '/../lib/bootstrap.php';
 require_login();
 
-// Every order, newest first.
-$orders = db_all('SELECT * FROM orders ORDER BY created_at DESC, id DESC');
+// Every order, newest first, with its customer and line totals in one query.
+// (This page used to run two more queries per order: 10,001 for 5,000 orders.)
+$orders = db_all('
+    SELECT o.id, o.status, o.tax_rate, o.created_at, c.name AS customer,
+           SUM(l.qty * l.unit_price) AS subtotal, COUNT(l.id) AS line_count
+    FROM orders o
+    LEFT JOIN customers c ON c.id = o.customer_id
+    LEFT JOIN order_lines l ON l.order_id = o.id
+    GROUP BY o.id, o.status, o.tax_rate, o.created_at, c.name
+    ORDER BY o.created_at DESC, o.id DESC
+');
 
 $rows = [];
 $grand = 0;
 foreach ($orders as $o) {
-    // One query for the customer and one for the lines, per order.
-    $customer = db_one('SELECT name FROM customers WHERE id = ?', [$o['customer_id']]);
-    $sum = db_one('SELECT SUM(qty * unit_price) AS subtotal, COUNT(*) AS line_count FROM order_lines WHERE order_id = ?', [$o['id']]);
-    $subtotal = round((float) $sum['subtotal'], 2);
+    $subtotal = round((float) $o['subtotal'], 2);
     $total = round($subtotal + round($subtotal * $o['tax_rate'] / 100, 2), 2);
     $grand += $total;
     $rows[] = [
         'id' => $o['id'],
-        'customer' => $customer['name'],
+        'customer' => $o['customer'],
         'status' => $o['status'],
         'created_at' => $o['created_at'],
-        'lines' => $sum['line_count'],
+        'lines' => $o['line_count'],
         'total' => $total,
     ];
 }
