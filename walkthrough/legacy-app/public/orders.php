@@ -5,23 +5,23 @@ require_login();
 // Every order, newest first.
 $orders = db_all('SELECT * FROM orders ORDER BY created_at DESC, id DESC');
 
-$rows = array();
+$rows = [];
 $grand = 0;
 foreach ($orders as $o) {
     // One query for the customer and one for the lines, per order.
-    $customer = db_one('SELECT name FROM customers WHERE id = ?', array($o['customer_id']));
-    $sum = db_one('SELECT SUM(qty * unit_price) AS subtotal, COUNT(*) AS line_count FROM order_lines WHERE order_id = ?', array($o['id']));
+    $customer = db_one('SELECT name FROM customers WHERE id = ?', [$o['customer_id']]);
+    $sum = db_one('SELECT SUM(qty * unit_price) AS subtotal, COUNT(*) AS line_count FROM order_lines WHERE order_id = ?', [$o['id']]);
     $subtotal = round((float) $sum['subtotal'], 2);
     $total = round($subtotal + round($subtotal * $o['tax_rate'] / 100, 2), 2);
     $grand += $total;
-    $rows[] = array(
+    $rows[] = [
         'id' => $o['id'],
         'customer' => $customer['name'],
         'status' => $o['status'],
         'created_at' => $o['created_at'],
         'lines' => $sum['line_count'],
         'total' => $total,
-    );
+    ];
 }
 
 $title = 'Orders';

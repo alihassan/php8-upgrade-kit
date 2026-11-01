@@ -10,7 +10,7 @@ define('TEST_ERROR_REPORTING', 22527);
  */
 final class Http
 {
-    private $cookies = array();
+    private $cookies = [];
 
     /** @return array{status:int, headers:array<string,string>, body:string} */
     public function get($path)
@@ -25,7 +25,7 @@ final class Http
 
     public function signIn()
     {
-        $res = $this->post('/login.php', array('email' => 'admin@example.com', 'password' => 'secret'));
+        $res = $this->post('/login.php', ['email' => 'admin@example.com', 'password' => 'secret']);
         if ($res['status'] !== 302) {
             throw new RuntimeException("Sign-in failed with HTTP {$res['status']}:\n" . substr($res['body'], 0, 2000));
         }
@@ -34,9 +34,9 @@ final class Http
 
     private function request($method, $path, $body = null)
     {
-        $headers = array();
+        $headers = [];
         if ($this->cookies) {
-            $pairs = array();
+            $pairs = [];
             foreach ($this->cookies as $k => $v) {
                 $pairs[] = $k . '=' . $v;
             }
@@ -45,28 +45,28 @@ final class Http
         if ($body !== null) {
             $headers[] = 'Content-Type: application/x-www-form-urlencoded';
         }
-        $context = stream_context_create(array('http' => array(
+        $context = stream_context_create(['http' => [
             'method' => $method,
             'header' => implode("\r\n", $headers),
-            'content' => $body === null ? '' : $body,
+            'content' => $body ?? '',
             'follow_location' => 0,
             'ignore_errors' => true,
             'timeout' => 60,
-        )));
+        ]]);
         $content = file_get_contents(BASE_URL . $path, false, $context);
         $status = 0;
-        $parsed = array();
+        $parsed = [];
         foreach ($http_response_header as $line) {
             if (preg_match('#^HTTP/\S+ (\d{3})#', $line, $m)) {
                 $status = (int) $m[1];
-            } elseif (strpos($line, ':') !== false) {
-                list($name, $value) = explode(':', $line, 2);
+            } elseif (str_contains($line, ':')) {
+                [$name, $value] = explode(':', $line, 2);
                 $parsed[strtolower(trim($name))] = trim($value);
                 if (strtolower(trim($name)) === 'set-cookie' && preg_match('/^([^=]+)=([^;]*)/', trim($value), $c)) {
                     $this->cookies[$c[1]] = $c[2];
                 }
             }
         }
-        return array('status' => $status, 'headers' => $parsed, 'body' => (string) $content);
+        return ['status' => $status, 'headers' => $parsed, 'body' => (string) $content];
     }
 }

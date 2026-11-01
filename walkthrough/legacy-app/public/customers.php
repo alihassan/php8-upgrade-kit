@@ -9,7 +9,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $city = filter_input(INPUT_POST, 'city', FILTER_SANITIZE_STRING);
     if ($name && $email) {
         $stmt = db()->prepare('INSERT INTO customers (name, email, company, city, created_at) VALUES (?, ?, ?, ?, NOW())');
-        $stmt->execute(array($name, $email, $company, $city));
+        $stmt->execute([$name, $email, $company, $city]);
         flash('Customer added.');
         redirect('customers.php');
     }
@@ -22,10 +22,10 @@ $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $perPage = 20;
 
 $where = '';
-$params = array();
+$params = [];
 if (strlen($q) > 0) {
     $where = 'WHERE name LIKE ? OR email LIKE ? OR company LIKE ?';
-    $params = array('%' . $q . '%', '%' . $q . '%', '%' . $q . '%');
+    $params = ['%' . $q . '%', '%' . $q . '%', '%' . $q . '%'];
 }
 $total = db_one("SELECT COUNT(*) AS n FROM customers $where", $params);
 $customers = db_all("SELECT * FROM customers $where ORDER BY name LIMIT $perPage OFFSET " . (($page - 1) * $perPage), $params);
@@ -56,7 +56,7 @@ include __DIR__ . '/../templates/header.php';
 <?php if ($pages > 1): ?>
 <p class="pager">
     <?php for ($i = 1; $i <= $pages; $i++): ?>
-        <a href="customers.php<?php echo h(build_query(array('q' => $q, 'page' => $i))); ?>"<?php if ($i == $page) echo ' class="current"'; ?>><?php echo $i; ?></a>
+        <a href="customers.php<?php echo h(build_query(['q' => $q, 'page' => $i])); ?>"<?php if ($i == $page) echo ' class="current"'; ?>><?php echo $i; ?></a>
     <?php endfor; ?>
 </p>
 <?php endif; ?>

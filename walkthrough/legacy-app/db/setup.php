@@ -8,10 +8,10 @@
  */
 require __DIR__ . '/seed.php';
 
-$opts = getopt('', array('orders::', 'customers::', 'products::'));
+$opts = getopt('', ['orders::', 'customers::', 'products::']);
 $c = require __DIR__ . '/../config/config.php';
 
-$pdo = new PDO('mysql:host=' . $c['db_host'] . ';port=' . $c['db_port'] . ';charset=utf8mb4', $c['db_user'], $c['db_pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
+$pdo = new PDO('mysql:host=' . $c['db_host'] . ';port=' . $c['db_port'] . ';charset=utf8mb4', $c['db_user'], $c['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
 $pdo->exec('DROP DATABASE IF EXISTS `' . $c['db_name'] . '`');
 $pdo->exec('CREATE DATABASE `' . $c['db_name'] . '` CHARACTER SET utf8mb4');
 $pdo->exec('USE `' . $c['db_name'] . '`');
@@ -22,7 +22,7 @@ sort($migrations);
 foreach ($migrations as $m) {
     $sql .= "\n" . file_get_contents($m);
 }
-foreach (array_filter(array_map('trim', explode(';', preg_replace('/^--.*$/m', '', $sql)))) as $statement) {
+foreach (array_filter(array_map(trim(...), explode(';', preg_replace('/^--.*$/m', '', $sql)))) as $statement) {
     $pdo->exec($statement);
 }
 

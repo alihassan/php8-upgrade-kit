@@ -2,14 +2,14 @@
 
 class Auth
 {
-    function check()
+    public function check()
     {
         return isset($_SESSION['user_id']);
     }
 
-    function attempt($email, $password)
+    public function attempt($email, $password)
     {
-        $user = db_one('SELECT * FROM users WHERE email = ?', array($email));
+        $user = db_one('SELECT * FROM users WHERE email = ?', [$email]);
         if (!$user || !password_verify($password, $user['password_hash'])) {
             return false;
         }
@@ -19,14 +19,14 @@ class Auth
         return true;
     }
 
-    function user()
+    public function user()
     {
-        return isset($_SESSION['user_name']) ? $_SESSION['user_name'] : null;
+        return $_SESSION['user_name'] ?? null;
     }
 
-    function logout()
+    public function logout()
     {
-        $_SESSION = array();
+        $_SESSION = [];
         session_destroy();
     }
 }

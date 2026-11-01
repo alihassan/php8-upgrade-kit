@@ -5,7 +5,7 @@
  */
 class OrderCollection implements Iterator, Countable
 {
-    private $orders = array();
+    private $orders = [];
     private $position = 0;
 
     public function __construct(array $orders)

@@ -15,10 +15,10 @@ putenv('DB_NAME=invoicer_test');
 $_ENV['DB_NAME'] = 'invoicer_test';
 
 $root = dirname(__DIR__);
-$env = array_merge(getenv(), array('DB_NAME' => 'invoicer_test'));
+$env = array_merge(getenv(), ['DB_NAME' => 'invoicer_test']);
 
 // 1. Database
-$setup = proc_open(array(PHP_BINARY, $root . '/db/setup.php', '--orders=60', '--customers=25', '--products=15'), array(2 => array('pipe', 'w')), $pipes, $root, $env);
+$setup = proc_open([PHP_BINARY, $root . '/db/setup.php', '--orders=60', '--customers=25', '--products=15'], [2 => ['pipe', 'w']], $pipes, $root, $env);
 $log = stream_get_contents($pipes[2]);
 if (proc_close($setup) !== 0) {
     fwrite(STDERR, "Could not create the test database:\n" . $log);
@@ -29,8 +29,8 @@ if (proc_close($setup) !== 0) {
 // errors shown so the tests can see them.
 $port = (int) (getenv('TEST_PORT') ?: 8765);
 $server = proc_open(
-    array(PHP_BINARY, '-d', 'display_errors=1', '-d', 'error_reporting=' . TEST_ERROR_REPORTING, '-S', '127.0.0.1:' . $port, '-t', $root . '/public'),
-    array(1 => array('file', $root . '/tests/server.log', 'w'), 2 => array('file', $root . '/tests/server.log', 'a')),
+    [PHP_BINARY, '-d', 'display_errors=1', '-d', 'error_reporting=' . TEST_ERROR_REPORTING, '-S', '127.0.0.1:' . $port, '-t', $root . '/public'],
+    [1 => ['file', $root . '/tests/server.log', 'w'], 2 => ['file', $root . '/tests/server.log', 'a']],
     $pipes,
     $root,
     $env

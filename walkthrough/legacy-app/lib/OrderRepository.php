@@ -10,10 +10,10 @@ class OrderRepository
     public function recent($limit)
     {
         $rows = db_all('SELECT * FROM orders ORDER BY created_at DESC, id DESC LIMIT ' . (int) $limit);
-        $orders = array();
+        $orders = [];
         foreach ($rows as $row) {
             $order = Order::fromRow($row);
-            $customer = db_one('SELECT name FROM customers WHERE id = ?', array($order->customer_id));
+            $customer = db_one('SELECT name FROM customers WHERE id = ?', [$order->customer_id]);
             $order->customer_name = $customer['name'];
             $order->lines = $this->lines($order->id);
             $totals = calculate_totals($order->lines, $order->tax_rate);
@@ -25,19 +25,19 @@ class OrderRepository
 
     public function find($id)
     {
-        $row = db_one('SELECT * FROM orders WHERE id = ?', array($id));
+        $row = db_one('SELECT * FROM orders WHERE id = ?', [$id]);
         if (!$row) {
             return null;
         }
         $order = Order::fromRow($row);
         $order->notes = $row['notes'];
-        $order->customer = db_one('SELECT * FROM customers WHERE id = ?', array($order->customer_id));
+        $order->customer = db_one('SELECT * FROM customers WHERE id = ?', [$order->customer_id]);
         $order->lines = $this->lines($order->id);
         return $order;
     }
 
     public function lines($orderId)
     {
-        return db_all('SELECT * FROM order_lines WHERE order_id = ? ORDER BY id', array($orderId));
+        return db_all('SELECT * FROM order_lines WHERE order_id = ? ORDER BY id', [$orderId]);
     }
 }

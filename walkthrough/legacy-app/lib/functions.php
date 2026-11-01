@@ -6,19 +6,17 @@
 function h($text)
 {
     static $escaper = null;
-    if ($escaper === null) {
-        $escaper = new Zend\Escaper\Escaper('utf-8');
-    }
+    $escaper ??= new Zend\Escaper\Escaper('utf-8');
     return $escaper->escapeHtml($text);
 }
 
 /**
  * Format an amount of money, e.g. money(12.5, 'USD', 2) => "$12.50".
  */
-function money($amount, $currency = 'USD', $decimals)
+function money($amount, $currency = 'USD', $decimals = null)
 {
-    $symbols = array('USD' => '$', 'EUR' => '€', 'GBP' => '£');
-    $symbol = isset($symbols[$currency]) ? $symbols[$currency] : $currency . ' ';
+    $symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£'];
+    $symbol = $symbols[$currency] ?? $currency . ' ';
     return $symbol . number_format($amount, $decimals);
 }
 
@@ -27,9 +25,9 @@ function money($amount, $currency = 'USD', $decimals)
  */
 function build_query($params)
 {
-    $parts = array();
+    $parts = [];
     reset($params);
-    while (list($key, $value) = each($params)) {
+    foreach ($params as $key => $value) {
         if ($value === null || $value === '') {
             continue;
         }
@@ -43,7 +41,7 @@ function build_query($params)
  */
 function initials($name)
 {
-    return strtoupper($name{0});
+    return strtoupper($name[0]);
 }
 
 function format_date($datetime)
@@ -59,11 +57,11 @@ function invoice_number($orderId)
 
 function status_label($status)
 {
-    $labels = array('open' => 'Open', 'paid' => 'Paid', 'void' => 'Void');
-    return isset($labels[$status]) ? $labels[$status] : ucfirst($status);
+    $labels = ['open' => 'Open', 'paid' => 'Paid', 'void' => 'Void'];
+    return $labels[$status] ?? ucfirst($status);
 }
 
-function redirect($url)
+function redirect($url): never
 {
     header('Location: ' . $url);
     exit;
@@ -75,7 +73,7 @@ function flash($message = null)
         $_SESSION['flash'] = $message;
         return null;
     }
-    $m = isset($_SESSION['flash']) ? $_SESSION['flash'] : null;
+    $m = $_SESSION['flash'] ?? null;
     unset($_SESSION['flash']);
     return $m;
 }

@@ -5,10 +5,10 @@ require_login();
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $sku = strtoupper(trim($_POST['sku']));
     $name = trim($_POST['name']);
-    $price = (real) $_POST['price'];
+    $price = (float) $_POST['price'];
     if ($sku !== '' && $name !== '' && $price > 0) {
         $stmt = db()->prepare('INSERT INTO products (sku, name, unit_price) VALUES (?, ?, ?)');
-        $stmt->execute(array($sku, $name, $price));
+        $stmt->execute([$sku, $name, $price]);
         flash('Product added.');
     } else {
         flash('SKU, name and a price above zero are required.');

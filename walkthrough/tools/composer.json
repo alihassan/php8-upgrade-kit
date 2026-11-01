@@ -7,7 +7,8 @@
     },
     "require-dev": {
         "phpcompatibility/php-compatibility": "10.0.0-alpha2@alpha",
-        "phpstan/phpstan": "^2.3"
+        "phpstan/phpstan": "^2.3",
+        "rector/rector": "^2.8"
     },
     "config": {
         "allow-plugins": {

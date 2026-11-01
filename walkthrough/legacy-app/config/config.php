@@ -4,7 +4,7 @@
  * local install can share this file. config/local.php (not committed) can
  * override anything for a developer machine.
  */
-$config = array(
+$config = [
     'db_host' => getenv('DB_HOST') ?: '127.0.0.1',
     'db_port' => getenv('DB_PORT') ?: '3306',
     'db_name' => getenv('DB_NAME') ?: 'invoicer',
@@ -13,7 +13,7 @@ $config = array(
     'company' => 'Northwind Supplies Ltd',
     'invoice_prefix' => 'INV',
     'currency' => 'USD',
-);
+];
 
 if (file_exists(__DIR__ . '/local.php')) {
     $config = array_merge($config, include __DIR__ . '/local.php');

@@ -1,0 +1,806 @@
+
+17 files with changes
+=====================
+
+1) ../legacy-app/config/config.php:4
+
+    ---------- begin diff ----------
+@@ Line 4 @@
+  * local install can share this file. config/local.php (not committed) can
+  * override anything for a developer machine.
+  */
+-$config = array(
++$config = [
+     'db_host' => getenv('DB_HOST') ?: '127.0.0.1',
+     'db_port' => getenv('DB_PORT') ?: '3306',
+     'db_name' => getenv('DB_NAME') ?: 'invoicer',
+@@ Line 13 @@
+     'company' => 'Northwind Supplies Ltd',
+     'invoice_prefix' => 'INV',
+     'currency' => 'USD',
+-);
++];
+
+ if (file_exists(__DIR__ . '/local.php')) {
+     $config = array_merge($config, include __DIR__ . '/local.php');
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+2) ../legacy-app/db/seed.php:7
+
+    ---------- begin diff ----------
+@@ Line 7 @@
+
+ final class SeedRandom
+ {
+-    private $state;
+-
+-    public function __construct($seed)
++    public function __construct(private $state)
+     {
+-        $this->state = $seed;
+     }
+
+     /** Integer between $min and $max inclusive (a plain LCG, the same on every PHP version). */
+@@ Line 30 @@
+ function seed_database(PDO $pdo, $orderCount = 5000, $customerCount = 500, $productCount = 120)
+ {
+     $r = new SeedRandom(20170615);
+-    $first = array('Amira', 'Ben', 'Chloe', 'Dmitri', 'Elena', 'Farid', 'Grace', 'Hiro', 'Ines', 'Jonas', 'Kofi', 'Lena', 'Mateo', 'Nadia', 'Omar', 'Priya', 'Quinn', 'Rosa', 'Sven', 'Tariq', 'Uma', 'Victor', 'Wen', 'Yara', 'Zane');
+-    $last = array('Adams', 'Baker', 'Costa', 'Diaz', 'Evans', 'Fischer', 'Garcia', 'Haddad', 'Ito', 'Jensen', 'Khan', 'Lopez', 'Moreau', 'Novak', 'Okafor', 'Petrov', 'Reyes', 'Sato', 'Tanaka', 'Weber');
+-    $companies = array('Acorn Labs', 'Bluefin Retail', 'Cedar & Co', 'Delta Freight', 'Ember Studio', 'Fjord Foods', 'Granite Works', 'Harbor Health', null, null);
+-    $cities = array('Leeds', 'Lyon', 'Austin', 'Porto', 'Karachi', 'Osaka', 'Denver', 'Gdansk', 'Nairobi', 'Toronto');
+-    $items = array('Paper, A4 ream', 'Toner cartridge', 'Desk lamp', 'Office chair', 'USB-C cable', 'Label printer', 'Whiteboard', 'Shipping boxes (25)', 'Packing tape', 'Monitor arm', 'Notebook pack', 'Stapler');
+-    $statuses = array('paid', 'paid', 'paid', 'open', 'open', 'void');
++    $first = ['Amira', 'Ben', 'Chloe', 'Dmitri', 'Elena', 'Farid', 'Grace', 'Hiro', 'Ines', 'Jonas', 'Kofi', 'Lena', 'Mateo', 'Nadia', 'Omar', 'Priya', 'Quinn', 'Rosa', 'Sven', 'Tariq', 'Uma', 'Victor', 'Wen', 'Yara', 'Zane'];
++    $last = ['Adams', 'Baker', 'Costa', 'Diaz', 'Evans', 'Fischer', 'Garcia', 'Haddad', 'Ito', 'Jensen', 'Khan', 'Lopez', 'Moreau', 'Novak', 'Okafor', 'Petrov', 'Reyes', 'Sato', 'Tanaka', 'Weber'];
++    $companies = ['Acorn Labs', 'Bluefin Retail', 'Cedar & Co', 'Delta Freight', 'Ember Studio', 'Fjord Foods', 'Granite Works', 'Harbor Health', null, null];
++    $cities = ['Leeds', 'Lyon', 'Austin', 'Porto', 'Karachi', 'Osaka', 'Denver', 'Gdansk', 'Nairobi', 'Toronto'];
++    $items = ['Paper, A4 ream', 'Toner cartridge', 'Desk lamp', 'Office chair', 'USB-C cable', 'Label printer', 'Whiteboard', 'Shipping boxes (25)', 'Packing tape', 'Monitor arm', 'Notebook pack', 'Stapler'];
++    $statuses = ['paid', 'paid', 'paid', 'open', 'open', 'void'];
+
+     $pdo->beginTransaction();
+
+     $stmt = $pdo->prepare('INSERT INTO users (email, password_hash, name, created_at) VALUES (?, ?, ?, ?)');
+-    $stmt->execute(array('admin@example.com', password_hash('secret', PASSWORD_DEFAULT), 'Admin', '2017-01-01 09:00:00'));
++    $stmt->execute(['admin@example.com', password_hash('secret', PASSWORD_DEFAULT), 'Admin', '2017-01-01 09:00:00']);
+
+-    $rows = array();
++    $rows = [];
+     for ($i = 1; $i <= $customerCount; $i++) {
+         $name = $r->pick($first) . ' ' . $r->pick($last);
+         $email = strtolower(str_replace(' ', '.', $name)) . $i . '@example.com';
+         $notes = $r->between(1, 5) === 1 ? 'Prefers invoices by post.' : null;
+-        $rows[] = array($name, $email, $r->pick($companies), $r->pick($cities), $notes, sprintf('2017-%02d-%02d 10:00:00', $r->between(1, 12), $r->between(1, 28)));
++        $rows[] = [$name, $email, $r->pick($companies), $r->pick($cities), $notes, sprintf('2017-%02d-%02d 10:00:00', $r->between(1, 12), $r->between(1, 28))];
+     }
+-    insert_many($pdo, 'customers', array('name', 'email', 'company', 'city', 'notes', 'created_at'), $rows);
++    insert_many($pdo, 'customers', ['name', 'email', 'company', 'city', 'notes', 'created_at'], $rows);
+
+-    $rows = array();
+-    $prices = array();
++    $rows = [];
++    $prices = [];
+     for ($i = 1; $i <= $productCount; $i++) {
+         $price = $r->between(199, 49999) / 100;
+         $prices[$i] = $price;
+-        $rows[] = array(sprintf('SKU-%04d', $i), $r->pick($items) . ' #' . $i, $price, $r->between(1, 10) === 1 ? 0 : 1);
++        $rows[] = [sprintf('SKU-%04d', $i), $r->pick($items) . ' #' . $i, $price, $r->between(1, 10) === 1 ? 0 : 1];
+     }
+-    insert_many($pdo, 'products', array('sku', 'name', 'unit_price', 'active'), $rows);
++    insert_many($pdo, 'products', ['sku', 'name', 'unit_price', 'active'], $rows);
+
+-    $orders = array();
+-    $lines = array();
+-    $taxRates = array(0, 5, 10, 20);
++    $orders = [];
++    $lines = [];
++    $taxRates = [0, 5, 10, 20];
+     for ($i = 1; $i <= $orderCount; $i++) {
+         $day = $r->between(0, 1094);
+         $created = date('Y-m-d H:i:s', strtotime('2017-01-01 08:00:00 UTC') + $day * 86400 + $r->between(0, 36000));
+         $notes = $r->between(1, 8) === 1 ? 'Deliver to the back entrance.' : null;
+-        $orders[] = array($r->between(1, $customerCount), $r->pick($statuses), $r->pick($taxRates), $notes, $created);
++        $orders[] = [$r->between(1, $customerCount), $r->pick($statuses), $r->pick($taxRates), $notes, $created];
+         $lineCount = $r->between(1, 4);
+         for ($l = 0; $l < $lineCount; $l++) {
+             $pid = $r->between(1, $productCount);
+-            $lines[] = array($i, $pid, sprintf('SKU-%04d', $pid), 'Item ' . sprintf('SKU-%04d', $pid), $r->between(1, 12), $prices[$pid]);
++            $lines[] = [$i, $pid, sprintf('SKU-%04d', $pid), 'Item ' . sprintf('SKU-%04d', $pid), $r->between(1, 12), $prices[$pid]];
+         }
+     }
+-    insert_many($pdo, 'orders', array('customer_id', 'status', 'tax_rate', 'notes', 'created_at'), $orders);
+-    insert_many($pdo, 'order_lines', array('order_id', 'product_id', 'sku', 'description', 'qty', 'unit_price'), $lines);
++    insert_many($pdo, 'orders', ['customer_id', 'status', 'tax_rate', 'notes', 'created_at'], $orders);
++    insert_many($pdo, 'order_lines', ['order_id', 'product_id', 'sku', 'description', 'qty', 'unit_price'], $lines);
+
+     $pdo->commit();
+-    return array('customers' => $customerCount, 'products' => $productCount, 'orders' => $orderCount, 'lines' => count($lines));
++    return ['customers' => $customerCount, 'products' => $productCount, 'orders' => $orderCount, 'lines' => count($lines)];
+ }
+
+ function insert_many(PDO $pdo, $table, array $columns, array $rows)
+@@ Line 86 @@
+     foreach (array_chunk($rows, 500) as $chunk) {
+         $placeholders = '(' . implode(', ', array_fill(0, count($columns), '?')) . ')';
+         $sql = 'INSERT INTO ' . $table . ' (' . implode(', ', $columns) . ') VALUES ' . implode(', ', array_fill(0, count($chunk), $placeholders));
+-        $values = array();
++        $values = [];
+         foreach ($chunk as $row) {
+             foreach ($row as $v) {
+                 $values[] = $v;
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+ * ClassPropertyAssignToConstructorPromotionRector
+
+
+3) ../legacy-app/db/setup.php:8
+
+    ---------- begin diff ----------
+@@ Line 8 @@
+  */
+ require __DIR__ . '/seed.php';
+
+-$opts = getopt('', array('orders::', 'customers::', 'products::'));
++$opts = getopt('', ['orders::', 'customers::', 'products::']);
+ $c = require __DIR__ . '/../config/config.php';
+
+-$pdo = new PDO('mysql:host=' . $c['db_host'] . ';port=' . $c['db_port'] . ';charset=utf8mb4', $c['db_user'], $c['db_pass'], array(PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION));
++$pdo = new PDO('mysql:host=' . $c['db_host'] . ';port=' . $c['db_port'] . ';charset=utf8mb4', $c['db_user'], $c['db_pass'], [PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION]);
+ $pdo->exec('DROP DATABASE IF EXISTS `' . $c['db_name'] . '`');
+ $pdo->exec('CREATE DATABASE `' . $c['db_name'] . '` CHARACTER SET utf8mb4');
+ $pdo->exec('USE `' . $c['db_name'] . '`');
+@@ Line 22 @@
+ foreach ($migrations as $m) {
+     $sql .= "/n" . file_get_contents($m);
+ }
+-foreach (array_filter(array_map('trim', explode(';', preg_replace('/^--.*$/m', '', $sql)))) as $statement) {
++foreach (array_filter(array_map(trim(...), explode(';', preg_replace('/^--.*$/m', '', $sql)))) as $statement) {
+     $pdo->exec($statement);
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * FunctionFirstClassCallableRector
+ * LongArrayToShortArrayRector
+
+
+4) ../legacy-app/lib/Auth.php:2
+
+    ---------- begin diff ----------
+@@ Line 2 @@
+
+ class Auth
+ {
+-    function check()
++    public function check()
+     {
+         return isset($_SESSION['user_id']);
+     }
+
+-    function attempt($email, $password)
++    public function attempt($email, $password)
+     {
+-        $user = db_one('SELECT * FROM users WHERE email = ?', array($email));
++        $user = db_one('SELECT * FROM users WHERE email = ?', [$email]);
+         if (!$user || !password_verify($password, $user['password_hash'])) {
+             return false;
+         }
+@@ Line 19 @@
+         return true;
+     }
+
+-    function user()
++    public function user()
+     {
+-        return isset($_SESSION['user_name']) ? $_SESSION['user_name'] : null;
++        return $_SESSION['user_name'] ?? null;
+     }
+
+-    function logout()
++    public function logout()
+     {
+-        $_SESSION = array();
++        $_SESSION = [];
+         session_destroy();
+     }
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+ * TernaryToNullCoalescingRector
+ * ExplicitPublicClassMethodRector
+
+
+5) ../legacy-app/lib/InvoiceRenderer.php:5
+
+    ---------- begin diff ----------
+@@ Line 5 @@
+  */
+ class InvoiceRenderer
+ {
+-    var $order;
+-    var $lines;
+-    var $totals;
++    public $lines;
++    public $totals;
+
+-    function InvoiceRenderer($order)
++    public function __construct(public $order)
+     {
+-        $this->order = $order;
+-        $this->lines = sort_lines_by_sku($order->lines);
+-        $this->totals = calculate_totals($this->lines, $order->tax_rate);
++        $this->lines = sort_lines_by_sku($this->order->lines);
++        $this->totals = calculate_totals($this->lines, $this->order->tax_rate);
+     }
+
+-    function render()
++    public function render()
+     {
+         $c = $GLOBALS['config'];
+         $order = $this->order;
+@@ Line 24 @@
+
+         ob_start();
+         ?>
+-<!-- generated by <?php echo get_class(); ?> -->
++<!-- generated by <?php echo self::class; ?> -->
+ <div class="invoice">
+     <header class="invoice-head">
+         <div>
+    ----------- end diff -----------
+
+Applied rules:
+ * VarToPublicPropertyRector
+ * Php4ConstructorRector
+ * ClassPropertyAssignToConstructorPromotionRector
+ * ClassOnObjectRector
+ * ExplicitPublicClassMethodRector
+
+
+6) ../legacy-app/lib/OrderCollection.php:5
+
+    ---------- begin diff ----------
+@@ Line 5 @@
+  */
+ class OrderCollection implements Iterator, Countable
+ {
+-    private $orders = array();
++    private $orders = [];
+     private $position = 0;
+
+     public function __construct(array $orders)
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+7) ../legacy-app/lib/OrderRepository.php:10
+
+    ---------- begin diff ----------
+@@ Line 10 @@
+     public function recent($limit)
+     {
+         $rows = db_all('SELECT * FROM orders ORDER BY created_at DESC, id DESC LIMIT ' . (int) $limit);
+-        $orders = array();
++        $orders = [];
+         foreach ($rows as $row) {
+             $order = Order::fromRow($row);
+-            $customer = db_one('SELECT name FROM customers WHERE id = ?', array($order->customer_id));
++            $customer = db_one('SELECT name FROM customers WHERE id = ?', [$order->customer_id]);
+             $order->customer_name = $customer['name'];
+             $order->lines = $this->lines($order->id);
+             $totals = calculate_totals($order->lines, $order->tax_rate);
+@@ Line 25 @@
+
+     public function find($id)
+     {
+-        $row = db_one('SELECT * FROM orders WHERE id = ?', array($id));
++        $row = db_one('SELECT * FROM orders WHERE id = ?', [$id]);
+         if (!$row) {
+             return null;
+         }
+         $order = Order::fromRow($row);
+         $order->notes = $row['notes'];
+-        $order->customer = db_one('SELECT * FROM customers WHERE id = ?', array($order->customer_id));
++        $order->customer = db_one('SELECT * FROM customers WHERE id = ?', [$order->customer_id]);
+         $order->lines = $this->lines($order->id);
+         return $order;
+     }
+@@ Line 38 @@
+
+     public function lines($orderId)
+     {
+-        return db_all('SELECT * FROM order_lines WHERE order_id = ? ORDER BY id', array($orderId));
++        return db_all('SELECT * FROM order_lines WHERE order_id = ? ORDER BY id', [$orderId]);
+     }
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+8) ../legacy-app/lib/db.php:11
+
+    ---------- begin diff ----------
+@@ Line 11 @@
+     if ($pdo === null) {
+         $c = $GLOBALS['config'];
+         $dsn = 'mysql:host=' . $c['db_host'] . ';port=' . $c['db_port'] . ';dbname=' . $c['db_name'] . ';charset=utf8mb4';
+-        $pdo = new PDO($dsn, $c['db_user'], $c['db_pass'], array(
++        $pdo = new PDO($dsn, $c['db_user'], $c['db_pass'], [
+             PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+             PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+-        ));
++        ]);
+     }
+     return $pdo;
+ }
+
+-function db_one($sql, $params = array())
++function db_one($sql, $params = [])
+ {
+     $stmt = db()->prepare($sql);
+     $stmt->execute($params);
+@@ Line 26 @@
+     return $stmt->fetch();
+ }
+
+-function db_all($sql, $params = array())
++function db_all($sql, $params = [])
+ {
+     $stmt = db()->prepare($sql);
+     $stmt->execute($params);
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+9) ../legacy-app/lib/functions.php:6
+
+    ---------- begin diff ----------
+@@ Line 6 @@
+ function h($text)
+ {
+     static $escaper = null;
+-    if ($escaper === null) {
+-        $escaper = new Zend/Escaper/Escaper('utf-8');
+-    }
++    $escaper ??= new Zend/Escaper/Escaper('utf-8');
+     return $escaper->escapeHtml($text);
+ }
+
+@@ Line 15 @@
+ /**
+  * Format an amount of money, e.g. money(12.5, 'USD', 2) => "$12.50".
+  */
+-function money($amount, $currency = 'USD', $decimals)
++function money($amount, $currency = 'USD', $decimals = null)
+ {
+-    $symbols = array('USD' => '$', 'EUR' => '€', 'GBP' => '£');
+-    $symbol = isset($symbols[$currency]) ? $symbols[$currency] : $currency . ' ';
++    $symbols = ['USD' => '$', 'EUR' => '€', 'GBP' => '£'];
++    $symbol = $symbols[$currency] ?? $currency . ' ';
+     return $symbol . number_format($amount, $decimals);
+ }
+
+@@ Line 27 @@
+  */
+ function build_query($params)
+ {
+-    $parts = array();
++    $parts = [];
+     reset($params);
+-    while (list($key, $value) = each($params)) {
++    foreach ($params as $key => $value) {
+         if ($value === null || $value === '') {
+             continue;
+         }
+@@ Line 43 @@
+  */
+ function initials($name)
+ {
+-    return strtoupper($name{0});
++    return strtoupper($name[0]);
+ }
+
+ function format_date($datetime)
+@@ Line 59 @@
+
+ function status_label($status)
+ {
+-    $labels = array('open' => 'Open', 'paid' => 'Paid', 'void' => 'Void');
+-    return isset($labels[$status]) ? $labels[$status] : ucfirst($status);
++    $labels = ['open' => 'Open', 'paid' => 'Paid', 'void' => 'Void'];
++    return $labels[$status] ?? ucfirst($status);
+ }
+
+-function redirect($url)
++function redirect($url): never
+ {
+     header('Location: ' . $url);
+     exit;
+@@ Line 75 @@
+         $_SESSION['flash'] = $message;
+         return null;
+     }
+-    $m = isset($_SESSION['flash']) ? $_SESSION['flash'] : null;
++    $m = $_SESSION['flash'] ?? null;
+     unset($_SESSION['flash']);
+     return $m;
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * OptionalParametersAfterRequiredRector
+ * LongArrayToShortArrayRector
+ * TernaryToNullCoalescingRector
+ * WhileEachToForeachRector
+ * CurlyToSquareBracketArrayStringRector
+ * IfToNullCoalescingAssignRector
+ * ReturnNeverTypeRector
+
+
+10) ../legacy-app/lib/invoice.php:17
+
+    ---------- begin diff ----------
+@@ Line 17 @@
+     $subtotal = round($subtotal, 2);
+     $tax = round($subtotal * $taxRate / 100, 2);
+
+-    return array(
++    return [
+         'subtotal' => $subtotal,
+         'tax' => $tax,
+         'total' => round($subtotal + $tax, 2),
+-    );
++    ];
+ }
+
+ function sort_lines_by_sku($lines)
+ {
+-    usort($lines, create_function('$a, $b', 'return strcmp($a["sku"], $b["sku"]);'));
++    usort($lines, fn($a, $b) => strcmp($a["sku"], $b["sku"]));
+     return $lines;
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+ * CreateFunctionToAnonymousFunctionRector
+ * ClosureToArrowFunctionRector
+
+
+11) ../legacy-app/public/customers.php:9
+
+    ---------- begin diff ----------
+@@ Line 9 @@
+     $city = filter_input(INPUT_POST, 'city', FILTER_SANITIZE_STRING);
+     if ($name && $email) {
+         $stmt = db()->prepare('INSERT INTO customers (name, email, company, city, created_at) VALUES (?, ?, ?, ?, NOW())');
+-        $stmt->execute(array($name, $email, $company, $city));
++        $stmt->execute([$name, $email, $company, $city]);
+         flash('Customer added.');
+         redirect('customers.php');
+     }
+@@ Line 22 @@
+ $perPage = 20;
+
+ $where = '';
+-$params = array();
++$params = [];
+ if (strlen($q) > 0) {
+     $where = 'WHERE name LIKE ? OR email LIKE ? OR company LIKE ?';
+-    $params = array('%' . $q . '%', '%' . $q . '%', '%' . $q . '%');
++    $params = ['%' . $q . '%', '%' . $q . '%', '%' . $q . '%'];
+ }
+ $total = db_one("SELECT COUNT(*) AS n FROM customers $where", $params);
+ $customers = db_all("SELECT * FROM customers $where ORDER BY name LIMIT $perPage OFFSET " . (($page - 1) * $perPage), $params);
+@@ Line 56 @@
+ <?php if ($pages > 1): ?>
+ <p class="pager">
+     <?php for ($i = 1; $i <= $pages; $i++): ?>
+-        <a href="customers.php<?php echo h(build_query(array('q' => $q, 'page' => $i))); ?>"<?php if ($i == $page) echo ' class="current"'; ?>><?php echo $i; ?></a>
++        <a href="customers.php<?php echo h(build_query(['q' => $q, 'page' => $i])); ?>"<?php if ($i == $page) echo ' class="current"'; ?>><?php echo $i; ?></a>
+     <?php endfor; ?>
+ </p>
+ <?php endif; ?>
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+12) ../legacy-app/public/orders.php:5
+
+    ---------- begin diff ----------
+@@ Line 5 @@
+ // Every order, newest first.
+ $orders = db_all('SELECT * FROM orders ORDER BY created_at DESC, id DESC');
+
+-$rows = array();
++$rows = [];
+ $grand = 0;
+ foreach ($orders as $o) {
+     // One query for the customer and one for the lines, per order.
+-    $customer = db_one('SELECT name FROM customers WHERE id = ?', array($o['customer_id']));
+-    $sum = db_one('SELECT SUM(qty * unit_price) AS subtotal, COUNT(*) AS line_count FROM order_lines WHERE order_id = ?', array($o['id']));
++    $customer = db_one('SELECT name FROM customers WHERE id = ?', [$o['customer_id']]);
++    $sum = db_one('SELECT SUM(qty * unit_price) AS subtotal, COUNT(*) AS line_count FROM order_lines WHERE order_id = ?', [$o['id']]);
+     $subtotal = round((float) $sum['subtotal'], 2);
+     $total = round($subtotal + round($subtotal * $o['tax_rate'] / 100, 2), 2);
+     $grand += $total;
+-    $rows[] = array(
++    $rows[] = [
+         'id' => $o['id'],
+         'customer' => $customer['name'],
+         'status' => $o['status'],
+@@ Line 21 @@
+         'created_at' => $o['created_at'],
+         'lines' => $sum['line_count'],
+         'total' => $total,
+-    );
++    ];
+ }
+
+ $title = 'Orders';
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+13) ../legacy-app/public/products.php:5
+
+    ---------- begin diff ----------
+@@ Line 5 @@
+ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+     $sku = strtoupper(trim($_POST['sku']));
+     $name = trim($_POST['name']);
+-    $price = (real) $_POST['price'];
++    $price = (float) $_POST['price'];
+     if ($sku !== '' && $name !== '' && $price > 0) {
+         $stmt = db()->prepare('INSERT INTO products (sku, name, unit_price) VALUES (?, ?, ?)');
+-        $stmt->execute(array($sku, $name, $price));
++        $stmt->execute([$sku, $name, $price]);
+         flash('Product added.');
+     } else {
+         flash('SKU, name and a price above zero are required.');
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+ * RenameCastRector
+
+
+14) ../legacy-app/tests/Http.php:10
+
+    ---------- begin diff ----------
+@@ Line 10 @@
+  */
+ final class Http
+ {
+-    private $cookies = array();
++    private $cookies = [];
+
+     /** @return array{status:int, headers:array<string,string>, body:string} */
+     public function get($path)
+@@ Line 25 @@
+
+     public function signIn()
+     {
+-        $res = $this->post('/login.php', array('email' => 'admin@example.com', 'password' => 'secret'));
++        $res = $this->post('/login.php', ['email' => 'admin@example.com', 'password' => 'secret']);
+         if ($res['status'] !== 302) {
+             throw new RuntimeException("Sign-in failed with HTTP {$res['status']}:/n" . substr($res['body'], 0, 2000));
+         }
+@@ Line 34 @@
+
+     private function request($method, $path, $body = null)
+     {
+-        $headers = array();
++        $headers = [];
+         if ($this->cookies) {
+-            $pairs = array();
++            $pairs = [];
+             foreach ($this->cookies as $k => $v) {
+                 $pairs[] = $k . '=' . $v;
+             }
+@@ Line 45 @@
+         if ($body !== null) {
+             $headers[] = 'Content-Type: application/x-www-form-urlencoded';
+         }
+-        $context = stream_context_create(array('http' => array(
++        $context = stream_context_create(['http' => [
+             'method' => $method,
+             'header' => implode("/r/n", $headers),
+-            'content' => $body === null ? '' : $body,
++            'content' => $body ?? '',
+             'follow_location' => 0,
+             'ignore_errors' => true,
+             'timeout' => 60,
+-        )));
++        ]]);
+         $content = file_get_contents(BASE_URL . $path, false, $context);
+         $status = 0;
+-        $parsed = array();
++        $parsed = [];
+         foreach ($http_response_header as $line) {
+             if (preg_match('#^HTTP//S+ (/d{3})#', $line, $m)) {
+                 $status = (int) $m[1];
+-            } elseif (strpos($line, ':') !== false) {
+-                list($name, $value) = explode(':', $line, 2);
++            } elseif (str_contains($line, ':')) {
++                [$name, $value] = explode(':', $line, 2);
+                 $parsed[strtolower(trim($name))] = trim($value);
+                 if (strtolower(trim($name)) === 'set-cookie' && preg_match('/^([^=]+)=([^;]*)/', trim($value), $c)) {
+                     $this->cookies[$c[1]] = $c[2];
+@@ Line 67 @@
+                 }
+             }
+         }
+-        return array('status' => $status, 'headers' => $parsed, 'body' => (string) $content);
++        return ['status' => $status, 'headers' => $parsed, 'body' => (string) $content];
+     }
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+ * TernaryToNullCoalescingRector
+ * ListToArrayDestructRector
+ * StrContainsRector
+
+
+15) ../legacy-app/tests/InvoiceTotalsTest.php:8
+
+    ---------- begin diff ----------
+@@ Line 8 @@
+ {
+     public function testAddsLinesAndTax()
+     {
+-        $lines = array(
+-            array('sku' => 'B', 'qty' => 2, 'unit_price' => '10.00'),
+-            array('sku' => 'A', 'qty' => 1, 'unit_price' => '5.50'),
+-        );
+-        $this->assertSame(array('subtotal' => 25.5, 'tax' => 5.1, 'total' => 30.6), calculate_totals($lines, '20.00'));
++        $lines = [
++            ['sku' => 'B', 'qty' => 2, 'unit_price' => '10.00'],
++            ['sku' => 'A', 'qty' => 1, 'unit_price' => '5.50'],
++        ];
++        $this->assertSame(['subtotal' => 25.5, 'tax' => 5.1, 'total' => 30.6], calculate_totals($lines, '20.00'));
+     }
+
+     public function testRoundsTaxOnceOnTheSubtotal()
+     {
+         // 3 x 3.33 = 9.99; 9.99 x 5% = 0.4995 -> 0.50
+-        $lines = array(array('sku' => 'A', 'qty' => 3, 'unit_price' => '3.33'));
+-        $this->assertSame(array('subtotal' => 9.99, 'tax' => 0.5, 'total' => 10.49), calculate_totals($lines, '5.00'));
++        $lines = [['sku' => 'A', 'qty' => 3, 'unit_price' => '3.33']];
++        $this->assertSame(['subtotal' => 9.99, 'tax' => 0.5, 'total' => 10.49], calculate_totals($lines, '5.00'));
+     }
+
+     public function testZeroTaxAndNoLines()
+     {
+-        $this->assertSame(array('subtotal' => 0.0, 'tax' => 0.0, 'total' => 0.0), calculate_totals(array(), 0));
+-        $lines = array(array('sku' => 'A', 'qty' => 4, 'unit_price' => '2.25'));
+-        $this->assertSame(array('subtotal' => 9.0, 'tax' => 0.0, 'total' => 9.0), calculate_totals($lines, '0.00'));
++        $this->assertSame(['subtotal' => 0.0, 'tax' => 0.0, 'total' => 0.0], calculate_totals([], 0));
++        $lines = [['sku' => 'A', 'qty' => 4, 'unit_price' => '2.25']];
++        $this->assertSame(['subtotal' => 9.0, 'tax' => 0.0, 'total' => 9.0], calculate_totals($lines, '0.00'));
+     }
+
+     public function testSortsLinesBySku()
+     {
+-        $lines = array(array('sku' => 'SKU-0009'), array('sku' => 'SKU-0002'), array('sku' => 'SKU-0005'));
++        $lines = [['sku' => 'SKU-0009'], ['sku' => 'SKU-0002'], ['sku' => 'SKU-0005']];
+         $sorted = sort_lines_by_sku($lines);
+-        $this->assertSame(array('SKU-0002', 'SKU-0005', 'SKU-0009'), array_column($sorted, 'sku'));
++        $this->assertSame(['SKU-0002', 'SKU-0005', 'SKU-0009'], array_column($sorted, 'sku'));
+     }
+ }
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+16) ../legacy-app/tests/PagesTest.php:35
+
+    ---------- begin diff ----------
+@@ Line 35 @@
+     public function testPagesNeedASignedInUser()
+     {
+         $http = new Http();
+-        foreach (array('/index.php', '/customers.php', '/products.php', '/orders.php', '/order.php?id=1', '/invoice.php?id=1') as $path) {
++        foreach (['/index.php', '/customers.php', '/products.php', '/orders.php', '/order.php?id=1', '/invoice.php?id=1'] as $path) {
+             $res = $http->get($path);
+             $this->assertSame(302, $res['status'], $path);
+             $this->assertSame('login.php', $res['headers']['location'], $path);
+@@ Line 44 @@
+
+     public function testWrongPasswordIsRejected()
+     {
+-        $res = (new Http())->post('/login.php', array('email' => 'admin@example.com', 'password' => 'nope'));
++        $res = (new Http())->post('/login.php', ['email' => 'admin@example.com', 'password' => 'nope']);
+         $this->assertSame(200, $res['status']);
+         $this->assertStringContainsString('don&#039;t match', $res['body']);
+     }
+@@ Line 96 @@
+     {
+         $body = $this->page($this->signedIn(), '/order.php?id=1');
+         preg_match_all('#<td>(SKU-/d+)</td>#', $body, $m);
+-        $this->assertSame(array('SKU-0002', 'SKU-0003', 'SKU-0006'), $m[1]);
++        $this->assertSame(['SKU-0002', 'SKU-0003', 'SKU-0006'], $m[1]);
+         $this->assertStringContainsString('id="order-total">$3,355.62<', $body);
+     }
+
+@@ Line 123 @@
+     public function testAddProductAndCustomer()
+     {
+         $http = $this->signedIn();
+-        $res = $http->post('/products.php', array('sku' => 'test-1', 'name' => 'Test widget', 'price' => '12.5'));
++        $res = $http->post('/products.php', ['sku' => 'test-1', 'name' => 'Test widget', 'price' => '12.5']);
+         $this->assertSame(302, $res['status']);
+         $body = $this->page($http, '/products.php');
+         $this->assertStringContainsString('Product added.', $body);
+@@ Line 130 @@
+         $this->assertStringContainsString('<td>TEST-1</td>', $body);
+         $this->assertStringContainsString('$12.50', $body);
+
+-        $res = $http->post('/customers.php', array('name' => 'Test <b>Person</b>', 'email' => 'test.person@example.com', 'company' => '', 'city' => 'Leeds'));
++        $res = $http->post('/customers.php', ['name' => 'Test <b>Person</b>', 'email' => 'test.person@example.com', 'company' => '', 'city' => 'Leeds']);
+         $this->assertSame(302, $res['status']);
+         $body = $this->page($http, '/customers.php?q=test.person');
+         $this->assertStringContainsString('Customer added.', $body);
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+17) ../legacy-app/tests/bootstrap.php:15
+
+    ---------- begin diff ----------
+@@ Line 15 @@
+ $_ENV['DB_NAME'] = 'invoicer_test';
+
+ $root = dirname(__DIR__);
+-$env = array_merge(getenv(), array('DB_NAME' => 'invoicer_test'));
++$env = array_merge(getenv(), ['DB_NAME' => 'invoicer_test']);
+
+ // 1. Database
+-$setup = proc_open(array(PHP_BINARY, $root . '/db/setup.php', '--orders=60', '--customers=25', '--products=15'), array(2 => array('pipe', 'w')), $pipes, $root, $env);
++$setup = proc_open([PHP_BINARY, $root . '/db/setup.php', '--orders=60', '--customers=25', '--products=15'], [2 => ['pipe', 'w']], $pipes, $root, $env);
+ $log = stream_get_contents($pipes[2]);
+ if (proc_close($setup) !== 0) {
+     fwrite(STDERR, "Could not create the test database:/n" . $log);
+@@ Line 29 @@
+ // errors shown so the tests can see them.
+ $port = (int) (getenv('TEST_PORT') ?: 8765);
+ $server = proc_open(
+-    array(PHP_BINARY, '-d', 'display_errors=1', '-d', 'error_reporting=' . TEST_ERROR_REPORTING, '-S', '127.0.0.1:' . $port, '-t', $root . '/public'),
+-    array(1 => array('file', $root . '/tests/server.log', 'w'), 2 => array('file', $root . '/tests/server.log', 'a')),
++    [PHP_BINARY, '-d', 'display_errors=1', '-d', 'error_reporting=' . TEST_ERROR_REPORTING, '-S', '127.0.0.1:' . $port, '-t', $root . '/public'],
++    [1 => ['file', $root . '/tests/server.log', 'w'], 2 => ['file', $root . '/tests/server.log', 'a']],
+     $pipes,
+     $root,
+     $env
+    ----------- end diff -----------
+
+Applied rules:
+ * LongArrayToShortArrayRector
+
+
+ [OK] 17 files have been changed by Rector                                                                             
+

@@ -35,7 +35,7 @@ final class PagesTest extends TestCase
     public function testPagesNeedASignedInUser()
     {
         $http = new Http();
-        foreach (array('/index.php', '/customers.php', '/products.php', '/orders.php', '/order.php?id=1', '/invoice.php?id=1') as $path) {
+        foreach (['/index.php', '/customers.php', '/products.php', '/orders.php', '/order.php?id=1', '/invoice.php?id=1'] as $path) {
             $res = $http->get($path);
             $this->assertSame(302, $res['status'], $path);
             $this->assertSame('login.php', $res['headers']['location'], $path);
@@ -44,7 +44,7 @@ final class PagesTest extends TestCase
 
     public function testWrongPasswordIsRejected()
     {
-        $res = (new Http())->post('/login.php', array('email' => 'admin@example.com', 'password' => 'nope'));
+        $res = (new Http())->post('/login.php', ['email' => 'admin@example.com', 'password' => 'nope']);
         $this->assertSame(200, $res['status']);
         $this->assertStringContainsString('don&#039;t match', $res['body']);
     }
@@ -96,7 +96,7 @@ final class PagesTest extends TestCase
     {
         $body = $this->page($this->signedIn(), '/order.php?id=1');
         preg_match_all('#<td>(SKU-\d+)</td>#', $body, $m);
-        $this->assertSame(array('SKU-0002', 'SKU-0003', 'SKU-0006'), $m[1]);
+        $this->assertSame(['SKU-0002', 'SKU-0003', 'SKU-0006'], $m[1]);
         $this->assertStringContainsString('id="order-total">$3,355.62<', $body);
     }
 
@@ -123,14 +123,14 @@ final class PagesTest extends TestCase
     public function testAddProductAndCustomer()
     {
         $http = $this->signedIn();
-        $res = $http->post('/products.php', array('sku' => 'test-1', 'name' => 'Test widget', 'price' => '12.5'));
+        $res = $http->post('/products.php', ['sku' => 'test-1', 'name' => 'Test widget', 'price' => '12.5']);
         $this->assertSame(302, $res['status']);
         $body = $this->page($http, '/products.php');
         $this->assertStringContainsString('Product added.', $body);
         $this->assertStringContainsString('<td>TEST-1</td>', $body);
         $this->assertStringContainsString('$12.50', $body);
 
-        $res = $http->post('/customers.php', array('name' => 'Test <b>Person</b>', 'email' => 'test.person@example.com', 'company' => '', 'city' => 'Leeds'));
+        $res = $http->post('/customers.php', ['name' => 'Test <b>Person</b>', 'email' => 'test.person@example.com', 'company' => '', 'city' => 'Leeds']);
         $this->assertSame(302, $res['status']);
         $body = $this->page($http, '/customers.php?q=test.person');
         $this->assertStringContainsString('Customer added.', $body);

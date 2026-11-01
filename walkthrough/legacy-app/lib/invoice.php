@@ -17,15 +17,15 @@ function calculate_totals(array $lines, $taxRate)
     $subtotal = round($subtotal, 2);
     $tax = round($subtotal * $taxRate / 100, 2);
 
-    return array(
+    return [
         'subtotal' => $subtotal,
         'tax' => $tax,
         'total' => round($subtotal + $tax, 2),
-    );
+    ];
 }
 
 function sort_lines_by_sku($lines)
 {
-    usort($lines, create_function('$a, $b', 'return strcmp($a["sku"], $b["sku"]);'));
+    usort($lines, fn($a, $b) => strcmp($a["sku"], $b["sku"]));
     return $lines;
 }
