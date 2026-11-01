@@ -13,32 +13,32 @@ class OrderCollection implements Iterator, Countable
         $this->orders = array_values($orders);
     }
 
-    public function current()
+    public function current(): Order
     {
         return $this->orders[$this->position];
     }
 
-    public function key()
+    public function key(): int
     {
         return $this->position;
     }
 
-    public function next()
+    public function next(): void
     {
         $this->position++;
     }
 
-    public function rewind()
+    public function rewind(): void
     {
         $this->position = 0;
     }
 
-    public function valid()
+    public function valid(): bool
     {
         return isset($this->orders[$this->position]);
     }
 
-    public function count()
+    public function count(): int
     {
         return count($this->orders);
     }
