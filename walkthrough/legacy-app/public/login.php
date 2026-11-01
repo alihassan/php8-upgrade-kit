@@ -3,8 +3,8 @@ require __DIR__ . '/../lib/bootstrap.php';
 
 $error = null;
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
+    $email = trim($_POST['email'] ?? '');
+    $password = $_POST['password'] ?? '';
     if (Auth::attempt($email, $password)) {
         redirect('index.php');
     }

@@ -1,8 +1,9 @@
 <?php
 // Loaded at the top of every page.
 
-// Hide the "strict standards" and deprecation noise.
-error_reporting(E_ALL & ~E_DEPRECATED & ~E_STRICT);
+// Report everything, deprecations included, so they show up in logs and tests
+// before the next PHP version turns them into errors.
+error_reporting(E_ALL);
 ini_set('display_errors', '1');
 
 date_default_timezone_set('UTC');

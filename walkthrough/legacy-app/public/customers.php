@@ -18,7 +18,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 }
 
 // The search term is never stored, and h() escapes it on output.
-$q = filter_input(INPUT_GET, 'q');
+$q = (string) filter_input(INPUT_GET, 'q');
 $page = isset($_GET['page']) ? max(1, (int) $_GET['page']) : 1;
 $perPage = 20;
 

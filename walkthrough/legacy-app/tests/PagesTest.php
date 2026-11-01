@@ -49,6 +49,15 @@ final class PagesTest extends TestCase
         $this->assertStringContainsString('don&#039;t match', $res['body']);
     }
 
+    public function testLoginWithMissingFieldsIsRejectedCleanly()
+    {
+        // A bot or a broken form can post without the fields; that used to pass null to trim().
+        $res = (new Http())->post('/login.php', []);
+        $this->assertSame(200, $res['status']);
+        $this->assertNotRegExp(self::PHP_ERRORS, $res['body']);
+        $this->assertStringContainsString('don&#039;t match', $res['body']);
+    }
+
     public function testDashboard()
     {
         $body = $this->page($this->signedIn(), '/index.php');

@@ -3,9 +3,9 @@ require __DIR__ . '/../lib/bootstrap.php';
 require_login();
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    $sku = strtoupper(trim($_POST['sku']));
-    $name = trim($_POST['name']);
-    $price = (float) $_POST['price'];
+    $sku = strtoupper(trim($_POST['sku'] ?? ''));
+    $name = trim($_POST['name'] ?? '');
+    $price = (float) ($_POST['price'] ?? 0);
     if ($sku !== '' && $name !== '' && $price > 0) {
         $stmt = db()->prepare('INSERT INTO products (sku, name, unit_price) VALUES (?, ?, ?)');
         $stmt->execute([$sku, $name, $price]);

@@ -1,8 +1,7 @@
 <?php
 
-// Production-style error level: everything except deprecation notices.
-// (E_ALL & ~E_DEPRECATED & ~E_STRICT, written as a number so it means the same on every version.)
-define('TEST_ERROR_REPORTING', 22527);
+// Every error level, deprecations included: a deprecation today is an error in the next major version.
+define('TEST_ERROR_REPORTING', E_ALL);
 
 /**
  * A tiny HTTP client with a cookie jar, built on file_get_contents so the
