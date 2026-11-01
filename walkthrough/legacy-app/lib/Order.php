@@ -7,6 +7,13 @@ class Order
     public $status;
     public $tax_rate;
     public $created_at;
+    public $notes;
+
+    // Filled in by OrderRepository. Before PHP 8.2 these were created on the fly.
+    public $customer_name;
+    public $customer;
+    public $lines = [];
+    public $total;
 
     public static function fromRow(array $row)
     {
