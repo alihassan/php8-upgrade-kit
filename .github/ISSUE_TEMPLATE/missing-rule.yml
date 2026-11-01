@@ -1,0 +1,23 @@
+name: Missing rule
+description: Something broke on PHP 8 and the checker didn't warn about it.
+labels: [missing-rule]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What broke
+      description: The error message or behavior you saw, and on which PHP version.
+    validations:
+      required: true
+  - type: textarea
+    id: code
+    attributes:
+      label: Code that should be flagged
+      render: php
+    validations:
+      required: true
+  - type: input
+    id: source
+    attributes:
+      label: PHP migration guide or RFC link
+      description: Rules must point to php.net/manual/en/migrationXY or wiki.php.net/rfc. Leave blank if you don't know it.
