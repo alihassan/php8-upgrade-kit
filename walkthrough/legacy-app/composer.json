@@ -1,0 +1,10 @@
+{
+    "name": "php8-upgrade-kit/legacy-invoicer",
+    "description": "A small order and invoice app, written the way many 2017 PHP 7 apps were.",
+    "type": "project",
+    "license": "MIT",
+    "require": {
+        "php": "^7.0",
+        "zendframework/zend-escaper": "2.6.1"
+    }
+}

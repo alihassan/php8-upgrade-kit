@@ -1,0 +1,57 @@
+# One command: docker compose up
+#   PHP 7.4 -> http://localhost:8074
+#   PHP 8.3 -> http://localhost:8083
+# Sign in with admin@example.com / secret.
+services:
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: secret
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "-psecret"]
+      interval: 3s
+      timeout: 3s
+      retries: 40
+    ports:
+      - "33306:3306"
+
+  # Installs Composer packages and loads the 5,000-order demo database, then exits.
+  setup:
+    build: { context: ./docker, dockerfile: php74.Dockerfile }
+    working_dir: /var/www/app
+    volumes:
+      - ./legacy-app:/var/www/app
+    environment: &db
+      DB_HOST: mysql
+      DB_USER: root
+      DB_PASS: secret
+      DB_NAME: invoicer
+    command: sh -c "composer install --no-interaction --no-progress && php db/setup.php"
+    depends_on:
+      mysql: { condition: service_healthy }
+
+  php74:
+    build: { context: ./docker, dockerfile: php74.Dockerfile }
+    volumes:
+      - ./legacy-app:/var/www/app
+    environment: *db
+    depends_on:
+      setup: { condition: service_completed_successfully }
+
+  php83:
+    build: { context: ./docker, dockerfile: php83.Dockerfile }
+    volumes:
+      - ./legacy-app:/var/www/app
+    environment: *db
+    depends_on:
+      setup: { condition: service_completed_successfully }
+
+  nginx:
+    image: nginx:1.27-alpine
+    ports:
+      - "8074:8074"
+      - "8083:8083"
+    volumes:
+      - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./legacy-app:/var/www/app:ro
+    depends_on: [php74, php83]
