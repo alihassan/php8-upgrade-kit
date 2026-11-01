@@ -1,0 +1,43 @@
+name: traffic
+
+# GitHub only keeps 14 days of repo traffic (views, clones, referrers,
+# popular pages). This saves a snapshot every Monday to the traffic-data
+# branch, so the history builds up for free.
+#
+# One-time setup: create a fine-grained personal access token for this repo
+# with "Administration: Read-only", and save it as the repo secret
+# TRAFFIC_TOKEN. Without it, the job skips quietly.
+on:
+  schedule:
+    - cron: '17 6 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Save traffic snapshot
+        env:
+          GH_TOKEN: ${{ secrets.TRAFFIC_TOKEN }}
+        run: |
+          if [ -z "$GH_TOKEN" ]; then echo "::warning::TRAFFIC_TOKEN is not set, skipping."; exit 0; fi
+          day=$(date -u +%F)
+          mkdir -p /tmp/traffic
+          for ep in views clones popular/referrers popular/paths; do
+            gh api "repos/$GITHUB_REPOSITORY/traffic/$ep" > "/tmp/traffic/${ep//\//-}.json"
+          done
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          if git ls-remote --exit-code --heads origin traffic-data >/dev/null; then
+            git fetch -q origin traffic-data && git checkout -q traffic-data
+          else
+            git checkout -q --orphan traffic-data && git rm -rq --cached . && git clean -fdq
+          fi
+          mkdir -p "data/$day" && cp /tmp/traffic/*.json "data/$day/"
+          git add data
+          git commit -qm "chore: traffic snapshot $day" || exit 0
+          git push -q origin traffic-data
