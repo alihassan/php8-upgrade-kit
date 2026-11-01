@@ -1,0 +1,12 @@
+* text=auto eol=lf
+*.php linguist-language=PHP
+*.ts linguist-language=TypeScript
+*.zip binary
+*.png binary
+*.gif binary
+
+# Keep generated and fixture files out of GitHub's language bar.
+tool/src/sample/*.json linguist-generated=true
+tool/test/fixtures/** linguist-vendored=true
+walkthrough/reports/** linguist-documentation=true
+walkthrough/legacy-app/db/*.sql linguist-detectable=false

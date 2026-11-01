@@ -1,0 +1,10 @@
+node_modules/
+dist/
+vendor/
+.phpunit.result.cache
+.phpunit.cache/
+*.log
+.env
+walkthrough/legacy-app/config/local.php
+walkthrough/bench/.work/
+.DS_Store
