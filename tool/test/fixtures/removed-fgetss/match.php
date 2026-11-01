@@ -1,0 +1,2 @@
+<?php
+$line = fgetss($h);
