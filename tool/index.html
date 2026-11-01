@@ -1,0 +1,82 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>PHP 8 Upgrade Checker</title>
+    <meta name="description" content="Paste PHP code or drop a project zip and see what breaks on PHP 8.0 to 8.4, with plain-English fixes. Runs in your browser; your code is never uploaded." />
+    <meta name="theme-color" content="#f5f6f4" />
+    <meta property="og:title" content="PHP 8 Upgrade Checker" />
+    <meta property="og:description" content="See what breaks when your PHP app moves to PHP 8.0 to 8.4, with a fix for each issue. Free, and your code never leaves the browser." />
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%231d5a46'/%3E%3Ctext x='16' y='22' font-family='monospace' font-size='15' font-weight='700' text-anchor='middle' fill='%23f5f6f4'%3E8%3C/text%3E%3C/svg%3E" />
+    <script>
+      (function () {
+        var t;
+        try { t = localStorage.getItem('theme'); } catch (e) {}
+        if (t !== 'light' && t !== 'dark') t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+        document.documentElement.dataset.theme = t;
+      })();
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap top-row">
+        <a class="brand" href="./" aria-label="PHP 8 Upgrade Checker home"><span class="brand-mark">8</span> php8-check</a>
+        <button class="icon-btn" type="button" data-theme-toggle aria-label="Switch between light and dark theme">
+          <svg viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path fill="currentColor" d="M12 3a9 9 0 1 0 9 9 7 7 0 0 1-9-9Z" /></svg>
+        </button>
+      </div>
+    </header>
+
+    <main class="wrap">
+      <section class="intro">
+        <h1>Will your PHP code run on PHP 8?</h1>
+        <p class="lede">Paste code, or drop <code>.php</code> files, a project <code>.zip</code>, or your <code>composer.json</code> and <code>composer.lock</code>. You get a list of what breaks, why, and how to fix it.</p>
+      </section>
+
+      <section class="controls" aria-label="Target PHP version">
+        <span class="label" id="target-label">Upgrading to</span>
+        <div class="segmented" role="radiogroup" aria-labelledby="target-label" id="targets"></div>
+      </section>
+
+      <div class="grid">
+        <section class="card input-card" aria-label="Your code">
+          <div class="toolbar">
+            <button type="button" class="btn btn-primary" id="sample">Load a legacy example</button>
+            <label class="btn">
+              Choose files
+              <input type="file" id="file-input" multiple accept=".php,.phtml,.inc,.zip,.json,.lock" hidden />
+            </label>
+            <select id="file-select" class="file-select" aria-label="File shown in the editor" hidden></select>
+            <button type="button" class="btn btn-quiet" id="clear">Clear</button>
+          </div>
+          <div class="editor-wrap" id="drop">
+            <div id="editor"></div>
+            <div class="drop-overlay" aria-hidden="true">Drop .php files, a .zip, or composer files</div>
+          </div>
+          <p class="status" id="status" role="status" aria-live="polite"></p>
+          <p class="privacy">
+            <strong>Your code stays in this browser tab.</strong> It is never uploaded. If you add Composer files, only the package names are sent to packagist.org to look up versions. Anonymous usage counts (for example "12 issues found") go to Google Analytics; your code and file names never do.
+          </p>
+        </section>
+
+        <section class="card report-card" aria-label="Report" id="report">
+          <div class="empty">
+            <p>Your report shows up here.</p>
+            <p class="muted">Not sure where to start? Press <strong>Load a legacy example</strong> to scan a small 2017-style PHP app.</p>
+          </div>
+        </section>
+      </div>
+    </main>
+
+    <footer class="foot wrap">
+      <p>
+        Built by Ali Hassan · <a href="https://github.com/alihassan" data-out="github">github.com/alihassan</a> ·
+        <a href="https://github.com/alihassan/php8-upgrade-kit/tree/main/walkthrough" data-out="walkthrough">See a full PHP 7.2 → 8.3 upgrade, step by step</a> ·
+        <a href="https://github.com/alihassan/php8-upgrade-kit" data-out="repo">Source (MIT)</a>
+      </p>
+      <p class="muted">Rules follow the official PHP migration guides. A scan can't see everything: some problems only appear when the code runs.</p>
+    </footer>
+    <script type="module" src="/src/ui/main.ts"></script>
+  </body>
+</html>
