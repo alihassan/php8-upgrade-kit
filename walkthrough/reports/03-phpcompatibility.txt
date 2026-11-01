@@ -1,0 +1,65 @@
+
+FILE: lib/functions.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 2 ERRORS AND 3 WARNINGS AFFECTING 5 LINES
+------------------------------------------------------------------------------------------------------------------------
+ 18 | WARNING | [ ] Declaring an optional parameter before a required parameter is deprecated since PHP 8.0. Parameter
+    |         |     $currency is optional, while parameter $decimals is required. The $currency parameter is implicitly
+    |         |     treated as a required parameter.
+    |         |     (PHPCompatibility.FunctionDeclarations.RemovedOptionalBeforeRequiredParam.Deprecated80)
+ 32 | ERROR   | [ ] Function each() is deprecated since PHP 7.2 and removed since PHP 8.0; Use a foreach loop or
+    |         |     ArrayIterator instead (PHPCompatibility.FunctionUse.RemovedFunctions.eachDeprecatedRemoved)
+ 46 | ERROR   | [x] Curly brace syntax for accessing array elements and string offsets has been deprecated in PHP 7.4
+    |         |     and removed in PHP 8.0. Found: $name{0}
+    |         |     (PHPCompatibility.Syntax.RemovedCurlyBraceArrayAccess.Removed)
+ 51 | WARNING | [ ] Function strftime() is deprecated since PHP 8.1; Use date() or IntlDateFormatter::format() instead
+    |         |     (PHPCompatibility.FunctionUse.RemovedFunctions.strftimeDeprecated)
+ 57 | WARNING | [ ] Using ${var} in strings is deprecated since PHP 8.2, use {$var} instead. Found: ${prefix}
+    |         |     (PHPCompatibility.TextStrings.RemovedDollarBraceStringEmbeds.DeprecatedVariableSyntax)
+------------------------------------------------------------------------------------------------------------------------
+PHPCBF CAN FIX THE 1 MARKED SNIFF VIOLATIONS AUTOMATICALLY
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: lib/invoice.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+------------------------------------------------------------------------------------------------------------------------
+ 29 | ERROR | Function create_function() is deprecated since PHP 7.2 and removed since PHP 8.0; Use an anonymous
+    |       | function instead (PHPCompatibility.FunctionUse.RemovedFunctions.create_functionDeprecatedRemoved)
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: lib/InvoiceRenderer.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 1 WARNING AFFECTING 1 LINE
+------------------------------------------------------------------------------------------------------------------------
+ 27 | WARNING | Calling get_class() without the $object argument is deprecated since PHP 8.3.
+    |         | (PHPCompatibility.ParameterValues.RemovedGetClassNoArgs.ArgMissing)
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: public/customers.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 0 ERRORS AND 4 WARNINGS AFFECTING 4 LINES
+------------------------------------------------------------------------------------------------------------------------
+  6 | WARNING | The constant "FILTER_SANITIZE_STRING" is deprecated since PHP 8.1
+    |         | (PHPCompatibility.Constants.RemovedConstants.filter_sanitize_stringDeprecated)
+  8 | WARNING | The constant "FILTER_SANITIZE_STRING" is deprecated since PHP 8.1
+    |         | (PHPCompatibility.Constants.RemovedConstants.filter_sanitize_stringDeprecated)
+  9 | WARNING | The constant "FILTER_SANITIZE_STRING" is deprecated since PHP 8.1
+    |         | (PHPCompatibility.Constants.RemovedConstants.filter_sanitize_stringDeprecated)
+ 20 | WARNING | The constant "FILTER_SANITIZE_STRING" is deprecated since PHP 8.1
+    |         | (PHPCompatibility.Constants.RemovedConstants.filter_sanitize_stringDeprecated)
+------------------------------------------------------------------------------------------------------------------------
+
+
+FILE: public/products.php
+------------------------------------------------------------------------------------------------------------------------
+FOUND 1 ERROR AFFECTING 1 LINE
+------------------------------------------------------------------------------------------------------------------------
+ 8 | ERROR | The real cast is deprecated since PHP 7.4 and removed since PHP 8.0; Use (float) instead
+   |       | (PHPCompatibility.TypeCasts.RemovedTypeCasts.realDeprecatedRemoved)
+------------------------------------------------------------------------------------------------------------------------
+
+PHPCompatibility exit code: 3

@@ -1,0 +1,15 @@
+ ------ -------------------------------------------------------- 
+  Line   legacy-app/lib/functions.php                            
+ ------ -------------------------------------------------------- 
+  46     Syntax error, unexpected '{', expecting ')' on line 46  
+         🪪  phpstan.parse (non-ignorable)                       
+ ------ -------------------------------------------------------- 
+
+
+ [ERROR] Found 1 error                                                                                                 
+
+⚠️  Result is incomplete because of severe errors. ⚠️
+   Fix these errors first and then re-run PHPStan
+   to get all reported errors.
+
+PHPStan exit code: 1

@@ -1,0 +1,15 @@
+# PHPStan level 2 on the legacy app, analysed as PHP 8.3 code.
+parameters:
+    level: 2
+    phpVersion: 80300
+    paths:
+        - ../legacy-app/config
+        - ../legacy-app/db
+        - ../legacy-app/lib
+        - ../legacy-app/public
+        - ../legacy-app/templates
+        - ../legacy-app/tests
+    scanDirectories:
+        - ../legacy-app/vendor
+    bootstrapFiles:
+        - phpstan-bootstrap.php
