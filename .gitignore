@@ -8,3 +8,4 @@ vendor/
 walkthrough/legacy-app/config/local.php
 walkthrough/bench/.work/
 .DS_Store
+tests/server.log
