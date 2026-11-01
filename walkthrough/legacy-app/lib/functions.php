@@ -6,7 +6,7 @@
 function h($text)
 {
     static $escaper = null;
-    $escaper ??= new Zend\Escaper\Escaper('utf-8');
+    $escaper ??= new Laminas\Escaper\Escaper('utf-8');
     // Empty database columns arrive as null; htmlspecialchars() needs a string since PHP 8.1.
     return $escaper->escapeHtml((string) $text);
 }

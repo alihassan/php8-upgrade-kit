@@ -16,7 +16,7 @@ final class PagesTest extends TestCase
     {
         $res = $http->get($path);
         $this->assertSame($status, $res['status'], "HTTP status for $path\n" . substr($res['body'], 0, 1500));
-        $this->assertNotRegExp(self::PHP_ERRORS, $res['body'], "PHP error output on $path");
+        $this->assertDoesNotMatchRegularExpression(self::PHP_ERRORS, $res['body'], "PHP error output on $path");
         return $res['body'];
     }
 
@@ -54,7 +54,7 @@ final class PagesTest extends TestCase
         // A bot or a broken form can post without the fields; that used to pass null to trim().
         $res = (new Http())->post('/login.php', []);
         $this->assertSame(200, $res['status']);
-        $this->assertNotRegExp(self::PHP_ERRORS, $res['body']);
+        $this->assertDoesNotMatchRegularExpression(self::PHP_ERRORS, $res['body']);
         $this->assertStringContainsString('don&#039;t match', $res['body']);
     }
 
