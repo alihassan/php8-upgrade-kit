@@ -1,4 +1,5 @@
 import { EditorView, basicSetup } from 'codemirror';
+import { placeholder } from '@codemirror/view';
 import { php } from '@codemirror/lang-php';
 import { EditorState } from '@codemirror/state';
 import { HighlightStyle, syntaxHighlighting } from '@codemirror/language';
@@ -39,6 +40,9 @@ export function createEditor(parent: HTMLElement, onChange: (code: string) => vo
         theme,
         syntaxHighlighting(highlight),
         EditorView.lineWrapping,
+        placeholder(
+          'Paste PHP code here, or drop .php files, a project .zip, composer.json or composer.lock onto this box.\n\nIn a zip, vendor/ and node_modules/ are skipped, and up to 2,000 PHP files are scanned.',
+        ),
         EditorView.contentAttributes.of({ 'aria-label': 'PHP code' }),
         EditorView.updateListener.of((u) => {
           if (u.docChanged) onChange(u.state.doc.toString());
