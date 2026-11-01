@@ -1,7 +1,9 @@
 # One command: docker compose up
-#   PHP 7.4 -> http://localhost:8074
 #   PHP 8.3 -> http://localhost:8083
 # Sign in with admin@example.com / secret.
+#
+# To see the original app on PHP 7.4 and 8.3 side by side, check out the
+# starting tag first: git checkout v0-php72-original -- walkthrough
 services:
   mysql:
     image: mysql:8.0
@@ -17,7 +19,7 @@ services:
 
   # Installs Composer packages and loads the 5,000-order demo database, then exits.
   setup:
-    build: { context: ./docker, dockerfile: php74.Dockerfile }
+    build: { context: ./docker, dockerfile: php83.Dockerfile }
     working_dir: /var/www/app
     volumes:
       - ./legacy-app:/var/www/app
@@ -30,14 +32,6 @@ services:
     depends_on:
       mysql: { condition: service_healthy }
 
-  php74:
-    build: { context: ./docker, dockerfile: php74.Dockerfile }
-    volumes:
-      - ./legacy-app:/var/www/app
-    environment: *db
-    depends_on:
-      setup: { condition: service_completed_successfully }
-
   php83:
     build: { context: ./docker, dockerfile: php83.Dockerfile }
     volumes:
@@ -49,9 +43,8 @@ services:
   nginx:
     image: nginx:1.27-alpine
     ports:
-      - "8074:8074"
       - "8083:8083"
     volumes:
       - ./docker/nginx.conf:/etc/nginx/conf.d/default.conf:ro
       - ./legacy-app:/var/www/app:ro
-    depends_on: [php74, php83]
+    depends_on: [php83]

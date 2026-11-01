@@ -1,0 +1,44 @@
+ ------ ---------------------------------------- 
+  Line   legacy-app/public/index.php             
+ ------ ---------------------------------------- 
+  32     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+  36     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+ ------ ---------------------------------------- 
+
+ ------ ---------------------------------------- 
+  Line   legacy-app/public/order.php             
+ ------ ---------------------------------------- 
+  32     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+  36     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+ ------ ---------------------------------------- 
+
+ ------ ---------------------------------------- 
+  Line   legacy-app/public/orders.php            
+ ------ ---------------------------------------- 
+  37     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+  48     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+ ------ ---------------------------------------- 
+
+ ------ ---------------------------------------- 
+  Line   legacy-app/public/products.php          
+ ------ ---------------------------------------- 
+  32     Variable $config might not be defined.  
+         🪪  variable.undefined                  
+ ------ ---------------------------------------- 
+
+ ------ --------------------------------------- 
+  Line   legacy-app/templates/header.php        
+ ------ --------------------------------------- 
+  6      Variable $title might not be defined.  
+         🪪  variable.undefined                 
+ ------ --------------------------------------- 
+
+ [ERROR] Found 8 errors                                                                                                
+
+PHPStan exit code: 1

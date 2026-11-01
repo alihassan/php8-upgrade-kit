@@ -4,7 +4,7 @@
 // Report everything, deprecations included, so they show up in logs and tests
 // before the next PHP version turns them into errors.
 error_reporting(E_ALL);
-ini_set('display_errors', '1');
+// Whether errors are shown or only logged is up to php.ini: off in production.
 
 date_default_timezone_set('UTC');
 
