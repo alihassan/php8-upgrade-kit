@@ -1,0 +1,103 @@
+name: walkthrough
+
+# Proves the walkthrough's claims on every push:
+#   - the original code passes its tests on PHP 7.4 and fails them on PHP 8.3
+#   - the finished code passes them on PHP 8.3
+#   - docker compose serves the app on both versions at the start tag, and on 8.3 at the end
+on:
+  push:
+    branches: [main]
+    paths: ['walkthrough/**', '.github/workflows/walkthrough.yml']
+  pull_request:
+    paths: ['walkthrough/**', '.github/workflows/walkthrough.yml']
+  workflow_dispatch:
+
+env:
+  DB_HOST: 127.0.0.1
+  DB_USER: root
+  DB_PASS: root
+
+jobs:
+  start-tag:
+    # v0-php72-original has no tests yet; v1-safety-net is the same app code plus the tests.
+    name: Original code on PHP ${{ matrix.php }}
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        php: ['7.4', '8.3']
+    services:
+      mysql:
+        image: mysql:8.0
+        env: { MYSQL_ROOT_PASSWORD: root }
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -proot" --health-interval=5s --health-timeout=3s --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Use the app as it was at v1-safety-net
+        run: git checkout v1-safety-net -- walkthrough/legacy-app
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '${{ matrix.php }}', extensions: pdo_mysql, coverage: none }
+      - name: Install (on 8.3, skip the PHP check so the code itself gets tested)
+        working-directory: walkthrough/legacy-app
+        run: composer install --no-interaction --no-progress ${{ matrix.php == '8.3' && '--ignore-platform-req=php' || '' }}
+      - name: Tests pass on PHP 7.4
+        if: matrix.php == '7.4'
+        working-directory: walkthrough/legacy-app
+        run: vendor/bin/phpunit
+      - name: Tests fail on PHP 8.3, as they should before the upgrade
+        if: matrix.php == '8.3'
+        working-directory: walkthrough/legacy-app
+        run: |
+          if vendor/bin/phpunit > phpunit.log 2>&1; then
+            cat phpunit.log
+            echo "::error::The original code passed on PHP 8.3, but the walkthrough says it breaks."
+            exit 1
+          fi
+          grep -m3 -oE "(Fatal error|Parse error)[^<]{0,160}" phpunit.log || true
+          grep -E "^Tests:" phpunit.log
+
+  end-tag:
+    name: Finished upgrade on PHP 8.3
+    runs-on: ubuntu-24.04
+    services:
+      mysql:
+        image: mysql:8.0
+        env: { MYSQL_ROOT_PASSWORD: root }
+        ports: ['3306:3306']
+        options: --health-cmd="mysqladmin ping -h 127.0.0.1 -proot" --health-interval=5s --health-timeout=3s --health-retries=30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: shivammathur/setup-php@v2
+        with: { php-version: '8.3', extensions: pdo_mysql, coverage: none }
+      - working-directory: walkthrough/legacy-app
+        run: composer install --no-interaction --no-progress
+      - working-directory: walkthrough/legacy-app
+        run: vendor/bin/phpunit
+
+  docker:
+    name: docker compose up
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+        with: { fetch-depth: 0 }
+      - name: Start tag serves on PHP 7.4, and PHP 8.3 shows why it breaks
+        run: |
+          git worktree add ../start v0-php72-original
+          cd ../start/walkthrough
+          docker compose up -d --build
+          for i in $(seq 90); do curl -sf -o /dev/null http://localhost:8074/login.php && break; sleep 2; done
+          curl -sf http://localhost:8074/login.php | grep -q '<h1>Sign in</h1>'
+          curl -s http://localhost:8083/login.php | tee php83.html | grep -Eq 'Fatal error|Parse error'
+          grep -oE '(Fatal error|Parse error)[^<]*' php83.html | head -1
+          docker compose down -v
+      - name: End tag serves the upgraded app on PHP 8.3
+        working-directory: walkthrough
+        run: |
+          docker compose up -d --build
+          for i in $(seq 90); do curl -sf -o /dev/null http://localhost:8083/login.php && break; sleep 2; done
+          curl -s -c jar -b jar -o /dev/null -d 'email=admin@example.com&password=secret' http://localhost:8083/login.php
+          curl -s -c jar -b jar http://localhost:8083/orders.php | grep -q 'id="order-total">5000<'
+          echo "Orders page lists 5000 orders on PHP 8.3."
+          docker compose down -v
