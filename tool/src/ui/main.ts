@@ -4,6 +4,7 @@ import './styles.css';
 import type { EditorView } from 'codemirror';
 import { createEditor, goToLine, setCode } from './editor';
 import { initAnalytics, track } from './analytics';
+import { initSend, REPORT_ENDPOINT } from './send';
 import { addFile, addZip, emptyCollected, MAX_FILES, type Collected } from '../engine/files';
 import { checkComposer, type ComposerReport } from '../engine/composer/check';
 import { copySummary, effort, EFFORT, groupFindings, SEVERITY_LABEL, summaryLine, supportLabel, toJson, toMarkdown } from '../engine/report/report';
@@ -178,6 +179,8 @@ $('clear').addEventListener('click', () => {
   status('');
 });
 
+const openSend = initSend(() => ({ result: state.result, composer: state.composer }));
+
 // ---------------------------------------------------------------- analysis
 const worker = new Worker(new URL('./worker.ts', import.meta.url), { type: 'module' });
 const pending = new Map<number, (r: { result?: AnalysisResult; error?: string; ms?: number }) => void>();
@@ -284,6 +287,7 @@ function renderReport(composerLoading = false) {
         <button type="button" class="btn" data-action="copy">Copy summary</button>
         <button type="button" class="btn" data-action="md">Download .md</button>
         <button type="button" class="btn" data-action="json">Download .json</button>
+        ${REPORT_ENDPOINT ? '<button type="button" class="btn btn-send" data-action="send">Send this report to Ali</button>' : ''}
       </div>
     </div>
     ${renderComposer(composerLoading)}
@@ -361,7 +365,9 @@ $('report').addEventListener('click', async (e) => {
   }
   const action = t.closest<HTMLButtonElement>('[data-action]')?.dataset.action;
   if (!action || !state.result) return;
-  if (action === 'copy') {
+  if (action === 'send') {
+    openSend();
+  } else if (action === 'copy') {
     const text = copySummary(state.result, state.composer);
     try {
       await navigator.clipboard.writeText(text);

@@ -589,3 +589,70 @@ td code {
     scroll-behavior: auto !important;
   }
 }
+
+/* ---------------------------------------------------------------- send dialog */
+.btn-send {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+dialog {
+  width: min(560px, calc(100vw - 32px));
+  max-height: calc(100vh - 32px);
+  padding: 20px;
+  border: 1px solid var(--line-strong);
+  border-radius: 22px;
+  background: var(--surface);
+  color: var(--ink);
+  box-shadow: var(--shadow-md);
+}
+dialog::backdrop {
+  background: rgb(0 0 0 / 0.45);
+}
+dialog h2 {
+  margin: 0 0 8px;
+  font-size: 1.2rem;
+}
+dialog p,
+.send-facts {
+  color: var(--ink-2);
+  font-size: 0.9rem;
+}
+.send-facts {
+  padding-left: 18px;
+}
+.send-facts li {
+  margin-bottom: 4px;
+}
+#send-form label {
+  display: grid;
+  gap: 4px;
+  margin: 10px 0;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+#send-form label.check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+#send-form textarea,
+#send-form input[type='email'] {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--line-strong);
+  border-radius: 12px;
+  background: var(--bg);
+  color: var(--ink);
+  font: inherit;
+  font-weight: 400;
+}
+#send-form .hp {
+  position: absolute;
+  left: -9999px;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+}
+.send-status {
+  min-height: 1.3em;
+}

@@ -60,7 +60,7 @@
           </div>
           <p class="status" id="status" role="status" aria-live="polite"></p>
           <p class="privacy">
-            <strong>Your code stays in this browser tab.</strong> It is never uploaded. If you add Composer files, only the package names are sent to packagist.org to look up versions. Anonymous usage counts (for example "12 issues found") go to Google Analytics; your code and file names never do.
+            <strong>Your code stays in this browser tab.</strong> It is never uploaded. If you add Composer files, only the package names are sent to packagist.org to look up versions. Anonymous usage counts (for example "12 issues found") go to Google Analytics; your code and file names never do. You can choose to send your report to Ali; the form says exactly what it includes.
           </p>
         </section>
 
@@ -72,6 +72,27 @@
         </section>
       </div>
     </main>
+
+    <dialog id="send-dialog" aria-labelledby="send-title">
+      <form id="send-form" method="dialog">
+        <h2 id="send-title">Send this report to Ali</h2>
+        <p>Ali Hassan built this tool. Sending your report shows him what real projects run into, and lets him reply if you leave an email address. It's optional, and nothing is sent until you press Send.</p>
+        <ul class="send-facts">
+          <li><strong>Sent:</strong> the PHP version you picked, the counts, and each finding's rule, file path and line number. Composer package names, if you added Composer files.</li>
+          <li><strong>Sent only if you tick the box below:</strong> the single line of code behind each finding.</li>
+          <li><strong>Never sent:</strong> your full files.</li>
+        </ul>
+        <label class="check"><input type="checkbox" name="includeCode" /> Include the flagged lines of code</label>
+        <label>Note (optional)<textarea name="note" rows="3" maxlength="2000" placeholder="For example: our host moves to PHP 8.3 next month."></textarea></label>
+        <label>Your email (optional, only if you'd like a reply)<input type="email" name="email" maxlength="200" autocomplete="email" /></label>
+        <label class="hp" aria-hidden="true">Website<input type="text" name="website" tabindex="-1" autocomplete="off" /></label>
+        <p class="send-status" id="send-status" role="status" aria-live="polite"></p>
+        <div class="actions">
+          <button type="submit" class="btn btn-primary" id="send-submit" value="send">Send report</button>
+          <button type="button" class="btn btn-quiet" id="send-cancel">Cancel</button>
+        </div>
+      </form>
+    </dialog>
 
     <footer class="foot wrap">
       <p>

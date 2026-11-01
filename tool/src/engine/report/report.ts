@@ -118,6 +118,35 @@ export function supportLabel(s: string): string {
   return s === 'yes' ? 'yes' : s === 'no' ? '**no**' : s === 'no-limit' ? 'no PHP limit declared' : 'unknown';
 }
 
+/**
+ * What "Send this report" posts. Without includeCode it carries rule ids,
+ * file paths, line numbers and counts only: no source code at all.
+ */
+export function sharePayload(r: AnalysisResult, composer: ComposerReport | null | undefined, includeCode: boolean) {
+  const e = effort(r.counts);
+  const report = {
+    tool: 'php8-check',
+    target: r.target,
+    counts: r.counts,
+    files: r.files,
+    findings: r.findings.map((f) => ({ ruleId: f.ruleId, severity: f.severity, file: f.file, line: f.line, ...(includeCode ? { code: f.code, note: f.note } : {}) })),
+    parseProblems: r.parseProblems.map((p) => ({ file: p.file, line: p.line })),
+    composer: composer
+      ? { rootPhp: composer.rootPhp, packages: composer.packages.map((p) => ({ name: p.name, current: p.current, supports: p.supports, lowestSupporting: p.lowestSupporting })) }
+      : null,
+  };
+  return {
+    target: r.target,
+    fatal: r.counts.fatal,
+    deprecated: r.counts.deprecated,
+    behavior_change: r.counts['behavior-change'],
+    files: r.files,
+    effort: e.band,
+    includes_code: includeCode,
+    report: JSON.stringify(report),
+  };
+}
+
 export function toJson(r: AnalysisResult, composer?: ComposerReport | null): string {
   return JSON.stringify({ tool: 'php8-check', target: r.target, summary: summaryLine(r), effort: effort(r.counts), counts: r.counts, files: r.files, findings: r.findings, parseProblems: r.parseProblems, composer: composer ?? null }, null, 2);
 }

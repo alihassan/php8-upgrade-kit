@@ -10,6 +10,7 @@ The build reads two settings:
 | `BASE` | The URL path the tool lives under. Must start and end with `/`. | `/php8-check/` |
 | `VITE_GA_ID` | Google Analytics 4 measurement ID. Leave it out to build with no analytics at all. | `G-XXXXXXXXXX` |
 | `OUT_DIR` | Where the files go (default `dist`). | `../site/public/php8-check` |
+| `VITE_REPORT_ENDPOINT` | Where "Send this report" posts. Leave it out and the button doesn't appear. | `https://example.com/api/report` |
 
 ## Option 1: GitHub Pages (set up in this repo)
 
@@ -84,10 +85,17 @@ static build you control.
   That endpoint sends `Access-Control-Allow-Origin: *`. The newer
   `repo.packagist.org/p2/...` endpoint does not (checked 2026-11-01), so the
   tool doesn't use it.
+- With `VITE_REPORT_ENDPOINT` set, a "Send this report" button appears. Nothing
+  is sent until the visitor fills in the form and presses Send. The POST body
+  (see `sharePayload()` in `src/engine/report/report.ts`) has the target, the
+  counts, and each finding's rule, file path and line; the flagged code lines
+  only if the visitor ticks the box; plus an optional note and email. Your
+  endpoint must accept a JSON POST and answer CORS for the tool's origin.
 - With `VITE_GA_ID` set, these Google Analytics events are sent, with counts
   and choices only: `php8_scan` (source, target, number of files, counts per
   severity, effort band, number of rules hit, scan time), `php8_target`,
   `php8_sample_load`, `php8_composer` (number of packages, blocked, unknown),
-  `php8_export` (md or json), `php8_copy_summary` and `php8_outbound`.
+  `php8_export` (md or json), `php8_copy_summary`, `php8_outbound`,
+  `php8_report_open` and `php8_report_sent` (whether code and an email were included, not their contents).
   No code, file names or package names are sent. If you change this, update
   the privacy line on the page too.
