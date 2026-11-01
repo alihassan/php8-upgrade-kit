@@ -10,6 +10,30 @@ function lname(n: Node): string {
   return String(nameOf(n) ?? '').replace(/^\\/, '').toLowerCase();
 }
 
+/**
+ * Does this method hand back a fresh instance of its own class? True for
+ * `return new self/static/ClassName`, a `: self`/`: static` return type, or
+ * `$x = new ...; return $x;`.
+ */
+function returnsNewSelf(method: Node, cls: string): boolean {
+  const isSelf = (n: Node) => {
+    const name = lname(n);
+    return name === 'self' || name === 'static' || name === cls;
+  };
+  if (method.type && isSelf(method.type)) return true;
+  const created = new Set<string>();
+  let found = false;
+  walk(method.body, (n) => {
+    if (['closure', 'arrowfunc', 'function', 'class'].includes(n.kind)) return false;
+    if (n.kind === 'assign' && n.left?.kind === 'variable' && n.right?.kind === 'new' && isSelf(n.right.what)) created.add(n.left.name);
+    if (n.kind === 'return' && n.expr) {
+      if (n.expr.kind === 'new' && isSelf(n.expr.what)) found = true;
+      if (n.expr.kind === 'variable' && created.has(n.expr.name)) found = true;
+    }
+  });
+  return found;
+}
+
 /** Pass 1: every class and function declared anywhere in the scanned files. */
 export function indexProject(parsed: { file: SourceFile; p: Parsed }[]): Project {
   const project: Project = { classes: new Map(), functions: new Set() };
@@ -35,7 +59,7 @@ export function indexProject(parsed: { file: SourceFile; p: Parsed }[]): Project
           for (const pr of m.properties ?? []) if (nameOf(pr.name)) info.props.add(nameOf(pr.name)!);
         } else if (m.kind === 'method') {
           const mname = lname(m.name);
-          info.methods.set(mname, { isStatic: !!m.isStatic });
+          info.methods.set(mname, { isStatic: !!m.isStatic, returnsSelf: !!m.isStatic && returnsNewSelf(m, info.lname) });
           if (mname === '__set') info.hasMagicSet = true;
           if (mname === '__construct') {
             // Promoted constructor parameters are declared properties.

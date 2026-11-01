@@ -21,7 +21,7 @@ export interface PackageReport {
   judged: string | null;
   phpConstraint: string | null;
   supports: Support;
-  /** Lowest stable release that supports the target, at or above the current one when possible. */
+  /** Lowest stable release at or above the current one that supports the target. */
   lowestSupporting: string | null;
   abandoned: string | boolean | null;
   error?: string;
@@ -104,8 +104,9 @@ export function judgePackage(
     const s = supportOf(v, target);
     return s === 'yes' || s === 'no-limit';
   });
-  const atOrAbove = base ? supporting.find((v) => cmp(parseVersion(v.version_normalized)!.v, base) >= 0) : undefined;
-  const lowest = atOrAbove ?? supporting[supporting.length - 1];
+  // Only versions at or above the current one count: an old release with an
+  // open-ended "php: >=5.5" is a downgrade, not a fix.
+  const lowest = base ? supporting.find((v) => cmp(parseVersion(v.version_normalized)!.v, base) >= 0) : supporting[0];
 
   return {
     name: w.name,

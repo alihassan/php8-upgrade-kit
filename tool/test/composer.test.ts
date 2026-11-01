@@ -53,6 +53,8 @@ const escaper = {
     versions: {
       '2.6.1': { version: '2.6.1', version_normalized: '2.6.1.0', require: { php: '^5.6 || ^7.0' } },
       '2.6.0': { version: '2.6.0', version_normalized: '2.6.0.0', require: { php: '^5.6 || ^7.0' } },
+      // Older and open-ended: "supports" 8.3 on paper, but it's a downgrade, so it must not be suggested.
+      '2.5.2': { version: '2.5.2', version_normalized: '2.5.2.0', require: { php: '>=5.5' } },
       'dev-master': { version: 'dev-master', version_normalized: 'dev-master', require: { php: '^8.0' } },
     },
   },

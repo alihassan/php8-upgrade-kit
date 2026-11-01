@@ -20,15 +20,28 @@ function declaredProps(project: Project, cls: ClassInfo): Set<string> | null {
   return null; // parent not in the scanned files
 }
 
-/** In the function around `before`, the class last assigned to `$var` with `new`. */
-function classOfVar(fn: Node | null, root: Node, varName: string, before: number): string | null {
+const short = (name: unknown) => String(name).replace(/^\\/, '').toLowerCase().split('\\').pop()!;
+
+/** Class of `new Foo()`, or of `Foo::create()` when that static method returns a new Foo. */
+function classCreatedBy(expr: Node, project: Project): string | null {
+  if (expr?.kind === 'new' && expr.what?.kind === 'name') return short(expr.what.name);
+  if (expr?.kind === 'call' && expr.what?.kind === 'staticlookup' && expr.what.what?.kind === 'name' && expr.what.offset?.kind === 'identifier') {
+    const cls = short(expr.what.what.name);
+    const m = project.classes.get(cls)?.methods.get(String(expr.what.offset.name).toLowerCase());
+    if (m?.returnsSelf) return cls;
+  }
+  return null;
+}
+
+/** In the function around `before`, the class of the object last assigned to `$var`. */
+function classOfVar(fn: Node | null, root: Node, project: Project, varName: string, before: number): string | null {
   let found: string | null = null;
   const body = fn ?? root;
   walk(body, (n) => {
     if (n !== body && ['function', 'method', 'closure', 'arrowfunc', 'class'].includes(n.kind)) return false;
     if (n.kind !== 'assign' || n.left?.kind !== 'variable' || n.left.name !== varName) return;
     if ((n.loc?.start?.offset ?? Infinity) >= before) return;
-    found = n.right?.kind === 'new' && n.right.what?.kind === 'name' ? String(n.right.what.name).replace(/^\\/, '').toLowerCase() : null;
+    found = classCreatedBy(n.right, project);
   });
   return found;
 }
@@ -40,7 +53,7 @@ const rule: Rule = {
   severity: 'deprecated',
   detection: 'heuristic',
   detectionNote:
-    'A heuristic. It checks $this->name = ... inside a class, and $obj->name = ... where $obj = new SomeClass in the same function. It only knows classes in the scanned files, and it skips classes that use traits, define __set(), or extend a class it cannot see. Names built at runtime ($obj->$key) are not checked.',
+    'A heuristic. It checks $this->name = ... inside a class, and $obj->name = ... where $obj came from new SomeClass (or a static factory that returns one) in the same function. It only knows classes in the scanned files, and it skips classes that use traits, define __set(), or extend a class it cannot see. Names built at runtime ($obj->$key) are not checked.',
   explanation:
     'Older PHP let code attach any new field to an object on the fly, even one the class never listed. PHP 8.2 logs a deprecation warning each time, and PHP 9 is expected to make it an error. List the field in the class (best), or add #[\\AllowDynamicProperties] above the class to keep the old behaviour.',
   before: `class Order {\n    public $id;\n}\n$order = new Order();\n$order->total = 99.50; // "total" was never declared`,
@@ -55,7 +68,7 @@ const rule: Rule = {
       if (left.what.name === 'this') {
         clsName = ctx.scope.cls ? String(nameOf(ctx.scope.cls.name) ?? '').toLowerCase() : null;
       } else {
-        clsName = classOfVar(ctx.scope.fn, ctx.root, String(left.what.name), n.loc?.start?.offset ?? 0);
+        clsName = classOfVar(ctx.scope.fn, ctx.root, ctx.project, String(left.what.name), n.loc?.start?.offset ?? 0);
       }
       const info = clsName ? ctx.project.classes.get(clsName.split('\\').pop()!) : undefined;
       if (!info) return;

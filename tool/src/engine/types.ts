@@ -28,7 +28,8 @@ export interface ClassInfo {
   parent: string | null;
   interfaces: string[];
   props: Set<string>;
-  methods: Map<string, { isStatic: boolean }>;
+  /** `returnsSelf`: a static factory that returns a new instance of this class. */
+  methods: Map<string, { isStatic: boolean; returnsSelf: boolean }>;
   allowDynamic: boolean;
   hasMagicSet: boolean;
   usesTraits: boolean;
