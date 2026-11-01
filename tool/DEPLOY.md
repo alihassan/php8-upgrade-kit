@@ -3,7 +3,7 @@
 The tool is a static site: HTML, CSS, JavaScript and fonts, no server code.
 Any static host works. All the options below are free.
 
-The build reads two settings:
+The official copy runs at https://hassan.im/php8-check/. To host your own, the build reads these settings:
 
 | Variable | What it does | Example |
 |---|---|---|
@@ -12,12 +12,14 @@ The build reads two settings:
 | `OUT_DIR` | Where the files go (default `dist`). | `../site/public/php8-check` |
 | `VITE_REPORT_ENDPOINT` | Where "Send this report" posts. Leave it out and the button doesn't appear. | `https://example.com/api/report` |
 
-## Option 1: GitHub Pages (set up in this repo)
+## Option 1: GitHub Pages
 
-1. On GitHub, open the repo's **Settings > Pages** and set **Source** to **GitHub Actions**.
-2. Push to `main`. The `pages` workflow runs the tests, builds with
-   `BASE=/php8-upgrade-kit/`, and publishes.
-3. The tool is then at `https://<your-user>.github.io/php8-upgrade-kit/`.
+1. On GitHub, open your fork's **Settings > Pages** and set **Source** to **GitHub Actions**.
+2. In `.github/workflows/pages.yml`, remove the `REDIRECT_TO` line. (In this repo it
+   is set, so the Pages address forwards visitors to the official copy.)
+3. Push to `main`. The `pages` workflow runs the tests, builds with
+   `BASE=/<repo-name>/`, and publishes.
+4. The tool is then at `https://<your-user>.github.io/<repo-name>/`.
 
 ## Option 2: inside an existing site at `/php8-check/`
 

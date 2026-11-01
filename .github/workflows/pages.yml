@@ -1,6 +1,8 @@
 name: pages
 
-# Builds tool/ and publishes it to GitHub Pages.
+# Publishes to GitHub Pages. In this repo the Pages address only forwards
+# visitors to the official copy (REDIRECT_TO). In a fork, delete the
+# REDIRECT_TO line to publish the full tool instead.
 # One-time setup: repo Settings > Pages > Source: "GitHub Actions".
 on:
   push:
@@ -17,6 +19,9 @@ concurrency:
   group: pages
   cancel-in-progress: true
 
+env:
+  REDIRECT_TO: https://hassan.im/php8-check/?utm_source=github&utm_medium=pages
+
 jobs:
   build:
     runs-on: ubuntu-24.04
@@ -28,9 +33,33 @@ jobs:
         with: { node-version: 22, cache: npm, cache-dependency-path: tool/package-lock.json }
       - run: npm ci
       - run: npm test
-      - run: npm run build
+      - name: Build the tool
+        if: env.REDIRECT_TO == ''
+        run: npm run build
         env:
           BASE: /${{ github.event.repository.name }}/
+      - name: Build a page that forwards to the official copy
+        if: env.REDIRECT_TO != ''
+        run: |
+          mkdir -p dist
+          cat > dist/index.html <<EOF
+          <!doctype html>
+          <html lang="en">
+          <head>
+          <meta charset="utf-8">
+          <title>php8-check has moved</title>
+          <meta name="robots" content="noindex">
+          <link rel="canonical" href="${REDIRECT_TO%%\?*}">
+          <meta http-equiv="refresh" content="0; url=${REDIRECT_TO}">
+          </head>
+          <body>
+          <p>php8-check lives at <a href="${REDIRECT_TO}">${REDIRECT_TO%%\?*}</a>.</p>
+          <script>location.replace("${REDIRECT_TO}");</script>
+          </body>
+          </html>
+          EOF
+          cp dist/index.html dist/404.html
+          cat dist/index.html
       - uses: actions/upload-pages-artifact@v3
         with: { path: tool/dist }
 
